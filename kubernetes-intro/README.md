@@ -12,7 +12,8 @@
 text
 ### winget install Kubernetes.minikube
 ### minikube delete
-### minikube start
+### minikube start --no-vtx-check --driver=virtualbox
+### minikube config set driver virtualbox
 
 ## 1. Создание namespace.yaml
 text
