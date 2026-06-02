@@ -1,6 +1,12 @@
 ## Разбор домашнего задания: namespace.yaml и pod.yaml, соответствующие всем требованиям.
 
 ## 0. Запускаю minikube с управлением через kube-cli
+### Подготовка Windows ПК
+### Чтобы VirtualBox/minikube мог запустить VM, надо:
+1. Перезагрузить компьютер и зайти в BIOS/UEFI (F8, DEL или F12 при старте нажать).
+2. Найти настройку виртуализации: она может называться Intel Virtualization Technology, VT-x, AMD-V, SVM Mode или Secure Virtual Machine.
+3. Включить её, сохранить изменения и перезагрузить ПК.
+
 ### Запускаю на Windows машине из про Git Bash:
 text
 ### winget install Kubernetes.minikube
