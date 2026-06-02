@@ -2,18 +2,20 @@
 
 ## 0. Запускаю minikube с управлением через kube-cli
 ### Подготовка Windows ПК
-### Чтобы VirtualBox/minikube мог запустить VM, надо:
+### Чтобы minikube мог запуститься, надо:
 1. Перезагрузить компьютер и зайти в BIOS/UEFI (Fn+F2, Fn+DEL или F12 при старте нажать).
 2. Найти настройку виртуализации: она может называться Intel Virtualization Technology, VT-x, AMD-V, SVM Mode или Secure Virtual Machine.
 3. Включить её, сохранить изменения и перезагрузить ПК.
 4. Чтобы отключить быстрый запуск в Windows, надо открыть Панель управления → Электропитание → Действия кнопок питания, нажать «Изменение параметров, которые сейчас недоступны», снять галочку с «Включить быстрый запуск» и нажать «Сохранить изменения».
+5. Скачать установщик QEMU для Windows с официального сайта: https://www.qemu.org/download/#windows
+6. Установите qemu, обязательно отметив галочку "Add to PATH" при установке
+7. Перезагрузите терминал/PowerShell/Windows
 
 ### Запускаю на Windows машине из про Git Bash:
 text
 ### winget install Kubernetes.minikube
-### minikube delete
-### minikube start --no-vtx-check --driver=virtualbox
-### minikube config set driver virtualbox
+### minikube config set driver qemu
+### minikube start
 
 ## 1. Создание namespace.yaml
 text
