@@ -3,33 +3,40 @@ kind: Pod
 metadata:
   name: homework-pod
   namespace: homework
+  labels:
+    app: homework
 spec:
-  volumes:
-    - name: shared-volume
-      emptyDir: {}
-  initContainers:
-    - name: init-downloader
-      image: busybox
-      command:
-        - /bin/sh
-        - -c
-        - |
-          wget -O /init/index.html https://example.com
-      volumeMounts:
-        - name: shared-volume
-          mountPath: /init
   containers:
-    - name: main-server
-      image: nginx
+    - name: nginx
+      image: nginx:alpine
       ports:
         - containerPort: 8000
       volumeMounts:
-        - name: shared-volume
+        - name: homework-volume
           mountPath: /homework
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          ln -sf /homework/index.html /usr/share/nginx/html/index.html
+          sed -i 's/listen       80;/listen       8000;/g' /etc/nginx/conf.d/default.conf
+          nginx -g 'daemon off;'
       lifecycle:
         preStop:
           exec:
-            command:
-              - /bin/sh
-              - -c
-              - rm -f /homework/index.html
+            command: ["/bin/sh", "-c", "rm -f /homework/index.html"]
+
+  initContainers:
+    - name: init-container
+      image: busybox
+      command:
+        - wget
+        - -O
+        - /init/index.html
+        - http://example.com
+      volumeMounts:
+        - name: homework-volume
+          mountPath: /init
+
+  volumes:
+    - name: homework-volume
+      emptyDir: {}
