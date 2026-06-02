@@ -3,6 +3,7 @@
 ## 0. Запускаю minikube с управлением через kube-cli
 ### Запускаю на Windows машине из про Git Bash кластер:
 text
+### minikube delete
 ### minikube start
 
 ## 1. Создание namespace.yaml
