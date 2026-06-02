@@ -1,5 +1,10 @@
 ## Разбор домашнего задания: namespace.yaml и pod.yaml, соответствующие всем требованиям.
 
+## 0. Запускаю minikube с управлением через kube-cli
+### Запускаю на Windows машине из про Git Bash кластер:
+text
+### minikube start
+
 ## 1. Создание namespace.yaml
 text
 ### apiVersion: v1
