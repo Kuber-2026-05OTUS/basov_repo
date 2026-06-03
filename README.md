@@ -211,10 +211,10 @@ PR метку Review Required
 
 ### Рекомендуемые источники
 
-- Документация по deployment
-- Документация по пробам
+- Документация по deployment https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+- Документация по пробам https://kubernetes.io/ru/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 - Для конфигурирования стратегий обновления можно использовать параметры `maxUnavailable` и `maxSurge`
-- Документация по назначению подов на ноды (для задания с *)
+- Документация по назначению подов на ноды (для задания с *) https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
 - Для задания с * добавьте метку к ноде вашего кластера с помощью `kubectl label nodes`
 
 ---
@@ -257,8 +257,8 @@ PR метку Review Required
 
 ## 7. Рекомендуемые источники
 
-- Документация по deployment
-- Документация по пробам
+- Документация по deployment https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+- Документация по пробам https://kubernetes.io/ru/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 - Для конфигурирования стратегий обновления можно использовать параметры `maxUnavailable` и `maxSurge`
-- Документация по назначению подов на ноды (для задания с *)
+- Документация по назначению подов на ноды (для задания с *) https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
 - Для задания с * добавьте метку к ноде вашего кластера с помощью `kubectl label nodes`
