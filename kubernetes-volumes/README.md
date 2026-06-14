@@ -248,7 +248,7 @@ kubectl apply -f deployment.yaml
 kubectl get sc
 kubectl get pvc,pv -n homework
 kubectl get deployments,rs,pods -n homework -o wide
-kubectl rollout status deployment/homework-deployment -n homework
+# kubectl rollout status deployment/homework-deployment -n homework
 ```
 
 ## 7. Проверка, что /conf/file отдается из ConfigMap
