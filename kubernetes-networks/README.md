@@ -78,8 +78,9 @@ wsl --update
 ```powershell
 # Полная остановка WSL
 wsl --shutdown
+```
+Затем перезапустите Rancher Desktop через File -> Exit
 
-# Затем перезапустите Rancher Desktop через File -> Exit
 
 Проверьте, что заглушка создана:
 
