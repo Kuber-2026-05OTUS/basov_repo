@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homework-deployment
+  namespace: homework
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: homework
+  template:
+    metadata:
+      labels:
+        app: homework
+    spec:
+      initContainers:
+        - name: init-container
+          image: busybox
+          command:
+            - wget
+            - -O
+            - /init/index.html
+            - http://example.com
+          volumeMounts:
+            - name: homework-volume
+              mountPath: /init
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 8000
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              cat > /etc/nginx/conf.d/default.conf <<'EOF'
+              server {
+                listen 8000;
+                server_name localhost;
+
+                location / {
+                  root /usr/share/nginx/html;
+                  index index.html index.htm;
+                }
+
+                location /conf/ {
+                  alias /homework/conf/;
+                }
+              }
+              EOF
+              ln -sf /homework/index.html /usr/share/nginx/html/index.html
+              nginx -g 'daemon off;'
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - test -f /homework/index.html
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - rm -f /homework/index.html
+          volumeMounts:
+            - name: homework-volume
+              mountPath: /homework
+            - name: homework-config-volume
+              mountPath: /homework/conf
+              readOnly: true
+      volumes:
+        - name: homework-volume
+          persistentVolumeClaim:
+            claimName: homework-pvc
+        - name: homework-config-volume
+          configMap:
+            name: homework-config
