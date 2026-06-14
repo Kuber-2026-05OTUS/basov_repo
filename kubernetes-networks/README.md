@@ -34,6 +34,8 @@ curl -sfL https://get.k3s.io | sh -
 sudo kubectl get nodes
 ```
 
+Сноска: если на команде `kubectl get nodes` появляется ошибка `127.0.0.1:6443 connection refused`, см. раздел `FAQ` ниже (кратко: запустить `k3s`, выставить `KUBECONFIG=/etc/rancher/k3s/k3s.yaml`, при необходимости скопировать kubeconfig в `$HOME/.kube/config`).
+
 Настройка kubeconfig для текущего пользователя:
 
 ```bash
@@ -129,6 +131,68 @@ kubectl get svc traefik -n traefik
 ```powershell
 curl http://homework.otus/index.html
 curl http://homework.otus/homepage
+```
+
+## 4. Вопросы и ответы (FAQ)
+
+### Вопрос
+
+При выполнении `sudo kubectl get nodes` получаю ошибку:
+
+```text
+Get "https://127.0.0.1:6443/api?timeout=32s": dial tcp 127.0.0.1:6443: connect: connection refused
+The connection to the server 127.0.0.1:6443 was refused - did you specify the right host or port?
+```
+
+### Ответ
+
+Обычно это означает, что `kubectl` смотрит в неверный `kubeconfig` (или k3s сервер не запущен).
+
+Сделайте шаги по порядку внутри Ubuntu/WSL:
+
+1. Проверить, что служба k3s запущена:
+
+```bash
+sudo systemctl status k3s
+```
+
+Если служба не запущена:
+
+```bash
+sudo systemctl start k3s
+sudo systemctl enable k3s
+```
+
+2. Проверить, что API k3s слушает порт 6443:
+
+```bash
+sudo ss -lntp | grep 6443
+```
+
+3. Принудительно использовать kubeconfig k3s:
+
+```bash
+echo '' >> ~/.bashrc
+echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> ~/.bashrc
+source ~/.bashrc
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+kubectl get nodes
+```
+
+4. Если без `sudo` не работает, скопировать kubeconfig в домашнюю директорию:
+
+```bash
+mkdir -p $HOME/.kube
+sudo cp /etc/rancher/k3s/k3s.yaml $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+kubectl get nodes
+```
+
+5. Если проблема осталась, перезапустить k3s:
+
+```bash
+sudo systemctl restart k3s
+kubectl get nodes
 ```
 
 Альтернативный вариант (через `port-forward`):
