@@ -79,7 +79,21 @@ wsl --update
 # Полная остановка WSL
 wsl --shutdown
 
-# Затем перезапустите Rancher Desktop
+# Затем перезапустите Rancher Desktop через File -> Exit
+
+Проверьте, что заглушка создана:
+
+```text
+mkdir -p ~/.kube
+cat > ~/.kube/config <<EOF
+apiVersion: v1
+clusters: []
+contexts: []
+current-context: ""
+kind: Config
+preferences: {}
+users: []
+EOF
 ```
 
 Если ошибка сохраняется — зарегистрируйте дистрибутивы вручную:
