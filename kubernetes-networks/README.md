@@ -152,6 +152,7 @@ kubectl apply -f service.yaml
 
 ```powershell
 kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
+kubectl delete ingressclass traefik
 ```
 
 Установка Traefik (Gateway API provider):
