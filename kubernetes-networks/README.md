@@ -157,18 +157,14 @@ kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/downloa
 Установка Traefik (Gateway API provider):
 ```powershell
 kubectl delete ingressclass traefik --ignore-not-found
+helm repo add traefik https://traefik.github.io/charts
+helm repo update
+
+helm delete traefik -n traefik --ignore-not-found
+helm show crds traefik/traefik | kubectl apply --server-side --force-conflicts -f -
+
+helm upgrade --install traefik traefik/traefik -n traefik --create-namespace --set providers.kubernetesGateway.enabled=true --set providers.kubernetesCRD.enabled=false --set providers.kubernetesIngress.enabled=false
 kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
-```
-
-Альтернативный способ становки Traefik:
-```powershell
-# helm repo add traefik https://traefik.github.io/charts
-# helm repo update
-
-# helm delete traefik -n traefik --ignore-not-found
-# helm show crds traefik/traefik | kubectl apply --server-side --force-conflicts -f -
-
-# helm upgrade --install traefik traefik/traefik -n traefik --create-namespace --set providers.kubernetesGateway.enabled=true --set providers.kubernetesCRD.enabled=false --set providers.kubernetesIngress.enabled=false
 ```
 
 Проверка:
