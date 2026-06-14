@@ -61,6 +61,55 @@ kubectl config current-context
 kubectl get nodes -o wide
 ```
 
+## Возможные ошибки
+
+### Конфигурация с Docker на WSL 
+
+Переустановите WSL в версию 2 (Rancher Desktop поддерживает только WSL 2):
+
+```powershell
+# Откройте PowerShell и проверьте версии WSL
+wsl --list --verbose
+
+# Если версия WSL = 1, переключите на WSL 2
+wsl --set-version rancher-desktop 2
+wsl --set-version rancher-desktop-data 2
+
+# Установите WSL 2 как версию по умолчанию для новых дистрибутивов
+wsl --set-default-version 2
+```
+
+Обновите WSL:
+
+```powershell
+wsl --update
+```
+
+Перезапустите WSL и Rancher Desktop:
+
+```powershell
+# Полная остановка WSL
+wsl --shutdown
+
+# Затем перезапустите Rancher Desktop
+```
+
+Если ошибка сохраняется — зарегистрируйте дистрибутивы вручную:
+
+```powershell
+# Удалите старые записи
+wsl --unregister rancher-desktop
+wsl --unregister rancher-desktop-data
+
+# Перезапустите Rancher Desktop — он создаст дистрибутивы заново
+```
+
+Дополнительно: сбросьте Winsock (если есть проблемы с сетью):
+
+```powershell
+netsh winsock reset
+```
+
 ## 1. Создание namespace.yaml
 
 Подготовка `namespace.yaml`:
