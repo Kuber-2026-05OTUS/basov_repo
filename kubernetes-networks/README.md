@@ -33,7 +33,7 @@ winget install derailed.k9s
 1. Открыть Rancher Desktop.
 2. В разделе Kubernetes включить `Enable Kubernetes`.
 3. Container Engine выбрать `containerd`.
-4. В Kubernetes version выбрать релиз с k3s.
+4. В Kubernetes version выбрать релиз с k3s (из стабильных выбрать latest).
 5. Нажать `Apply` и дождаться статуса `Kubernetes is running`.
 
 Проверка:
@@ -47,6 +47,55 @@ kubectl get nodes
 
 ```powershell
 k9s
+```
+
+## Возможные ошибки
+
+### Конфигурация с Docker на WSL 
+
+Переустановите WSL в версию 2 (Rancher Desktop поддерживает только WSL 2):
+
+```powershell
+# Откройте PowerShell и проверьте версии WSL
+wsl --list --verbose
+
+# Если версия WSL = 1, переключите на WSL 2
+wsl --set-version rancher-desktop 2
+wsl --set-version rancher-desktop-data 2
+
+# Установите WSL 2 как версию по умолчанию для новых дистрибутивов
+wsl --set-default-version 2
+```
+
+Обновите WSL:
+
+```powershell
+wsl --update
+```
+
+Перезапустите WSL и Rancher Desktop:
+
+```powershell
+# Полная остановка WSL
+wsl --shutdown
+
+# Затем перезапустите Rancher Desktop
+```
+
+Если ошибка сохраняется — зарегистрируйте дистрибутивы вручную:
+
+```powershell
+# Удалите старые записи
+wsl --unregister rancher-desktop
+wsl --unregister rancher-desktop-data
+
+# Перезапустите Rancher Desktop — он создаст дистрибутивы заново
+```
+
+Дополнительно: сбросьте Winsock (если есть проблемы с сетью):
+
+```powershell
+netsh winsock reset
 ```
 
 ## 1. Подготовка namespace.yaml
