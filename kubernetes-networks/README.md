@@ -27,6 +27,7 @@ curl -sfL https://get.k3s.io | sh -
 sudo kubectl get nodes
 ```
 
+Сноска 0: если нужно понять причину ошибки по `kubectl`/`k3s`, см. раздел `FAQ` ниже (кратко: проверить `journalctl -u k3s`, порт `6443`, статус сервиса и текущий контекст `kubectl`).
 Сноска 1: если на команде `kubectl get nodes` появляется ошибка `127.0.0.1:6443 connection refused`, см. раздел `FAQ` ниже (кратко: запустить `k3s`, выставить `KUBECONFIG=/etc/rancher/k3s/k3s.yaml`, при необходимости скопировать kubeconfig в `$HOME/.kube/config`).
 Сноска 2: если ошибка появляется после запуска `kubectl get nodes` из Windows-терминала, см. раздел `FAQ` ниже (кратко: выполнять команды в Ubuntu/WSL, проверить `kubectl config current-context`, при необходимости переключиться на контекст `default` из k3s).
 
@@ -128,6 +129,61 @@ curl http://homework.otus/homepage
 ```
 
 ## 4. Вопросы и ответы (FAQ)
+
+### Вопрос
+
+Как посмотреть логи и найти ошибку?
+
+### Ответ
+
+#### Логи k3s через journalctl
+
+```bash
+journalctl -u k3s -n 100 --no-pager
+journalctl -u k3s -f
+```
+
+#### Запуск k3s в debug-режиме (детальный вывод)
+
+```bash
+sudo systemctl stop k3s
+sudo k3s server --debug 2>&1 | tee /tmp/k3s-debug.log
+```
+
+#### Поиск типовых ошибок в логах
+
+```bash
+journalctl -u k3s | grep -i "error\|fail\|listen\|6443"
+```
+
+#### Основные причины и решения
+
+| Причина | Как проверить | Решение |
+|---|---|---|
+| WSL2 сетевой режим | `wsl.exe -l -v` и настройки `networkingMode` | В `.wslconfig` установить `networkingMode=virtual` или убрать экспериментальный режим |
+| Брандмауэр Windows | Порт `6443` недоступен извне | Добавить firewall rule для `6443/tcp` в Windows |
+| Другой процесс занял `6443` | `ss -nltp \| grep 6443` показывает другой PID | Остановить конфликтующий процесс и перезапустить `k3s` |
+| `k3s` не запущен | `systemctl status k3s` = `inactive/failed` | `sudo systemctl start k3s`, затем смотреть `journalctl` |
+| Проблема cgroup driver | В логах есть ошибки `cgroup` | Синхронизировать cgroup настройки контейнерного рантайма и Kubernetes |
+| Firewall/iptables в Ubuntu | `sudo ufw status` или `sudo iptables -nvL` | `sudo ufw allow 6443/tcp` |
+
+#### Быстрая диагностика
+
+```bash
+# 1) Статус сервиса
+systemctl status k3s
+
+# 2) Логи с ошибками
+journalctl -u k3s -n 50 --no-pager | grep -E "error|fail|listen"
+
+# 3) Порт слушается?
+ss -nltp | grep 6443
+
+# 4) Проверка kubectl
+kubectl cluster-info
+```
+
+Если в логах есть `failed to listen`, `address already in use` или `permission denied`, это обычно указывает на конкретную причину: конфликт порта, нехватку прав или блокировку firewall.
 
 ### Вопрос
 
