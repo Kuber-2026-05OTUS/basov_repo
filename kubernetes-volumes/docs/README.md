@@ -1,3 +1,4 @@
+# D. kubernetes-volumes
 # Методическое пособие по выполнению домашнего задания курса «Инфраструктурная платформа на основе Kubernetes»
 
 **Volumes, StorageClass, PV, PVC**
@@ -53,10 +54,10 @@
 
 ### Рекомендуемые источники
 
-- Документация по volumes  
-- Документация по PV и PVC  
-- Документация по storageClass  
-- Документация по configMap  
+- Документация по volumes https://kubernetes.io/docs/concepts/storage/volumes/ 
+- Документация по PV и PVC https://kubernetes.io/docs/concepts/storage/persistent-volumes/ 
+- Документация по storageClass https://kubernetes.io/docs/concepts/storage/storage-classes/ 
+- Документация по configMap https://kubernetes.io/docs/concepts/configuration/configmap/ 
 
 Для задания с `*` и создания кастомного storageClass можно взять за образец storageClass по-умолчанию. Посмотреть его конфигурацию можно, например, так:  
 ```bash
@@ -100,10 +101,10 @@ kubectl get sc standard -o yaml
 
 ## 7. Рекомендуемые источники
 
-- Документация по volumes  
-- Документация по PV и PVC  
-- Документация по storageClass  
-- Документация по configMap  
+- Документация по volumes https://kubernetes.io/docs/concepts/storage/volumes/ 
+- Документация по PV и PVC https://kubernetes.io/docs/concepts/storage/persistent-volumes/ 
+- Документация по storageClass https://kubernetes.io/docs/concepts/storage/storage-classes/ 
+- Документация по configMap https://kubernetes.io/docs/concepts/configuration/configmap/
 
 Для задания с `*` и создания кастомного storageClass можно взять за образец storageClass по-умолчанию. Посмотреть его конфигурацию можно, например, так:  
 ```bash
