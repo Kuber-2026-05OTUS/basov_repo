@@ -1,23 +1,28 @@
 # Выполнено ДЗ №3
 
- - [V] Основное ДЗ
- - [V] Задание со *
+- [V] Основное ДЗ
+- [V] Задание со *
 
 ## В процессе сделано:
- - Подготовлен файл kubernetes-networks/namespace.yaml
- - Подготовлен файл kubernetes-networks/deployment.yaml (readinessProbe через httpGet /index.html)
- - Подготовлен файл kubernetes-networks/service.yaml (ClusterIP)
- - Подготовлен файл kubernetes-networks/gateway.yaml
- - Подготовлен файл kubernetes-networks/httpRoute.yaml (включая rewrite /homepage -> /index.html)
- - Подготовлен файл kubernetes-networks/README.md
+- Изменена readiness-проба в deployment.yaml с `exec` на `httpGet` по URL `/index.html` на порту `8000`
+- Подготовлен файл `kubernetes-networks/namespace.yaml`
+- Подготовлен файл `kubernetes-networks/deployment.yaml`
+- Подготовлен файл `kubernetes-networks/service.yaml` (`ClusterIP`)
+- Подготовлен файл `kubernetes-networks/gateway.yaml`
+- Подготовлен файл `kubernetes-networks/httpRoute.yaml` (включая rewrite `/homepage` -> `/index.html`)
+- Подготовлен файл `kubernetes-networks/README.md`
 
 ## Как запустить проект:
- - Например, выполнить `kubectl apply -f namespace.yaml`, `kubectl apply -f deployment.yaml`, `kubectl apply -f service.yaml`, `kubectl apply -f gateway.yaml`, `kubectl apply -f httpRoute.yaml` в директории kubernetes-networks
- - Установить Traefik Gateway API controller через Helm chart `traefik/traefik` с включением `providers.kubernetesGateway.enabled=true`
+- Установить Kubernetes кластер без Ingress-контроллера
+- До установки Traefik применить Gateway API CRD: `kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml`
+- Установить Traefik Gateway API controller через Helm chart `traefik/traefik` с включением `providers.kubernetesGateway.enabled=true`
+- Применить манифесты в директории `kubernetes-networks`: `namespace.yaml`, `deployment.yaml`, `service.yaml`, `gateway.yaml`, `httpRoute.yaml`
 
 ## Как проверить работоспособность:
- - Например, запустить команды `kubectl get all -n homework`, `kubectl get gateway -n homework`, `kubectl get httproute -n homework`
- - Для проверки с Windows-хоста добавить `homework.otus` в hosts, выполнить `kubectl -n traefik port-forward svc/traefik 80:80` и проверить `curl http://homework.otus/index.html` и `curl http://homework.otus/homepage`
+- Проверить ресурсы: `kubectl get pods,svc,gateway,httproute -n homework`
+- Для проверки через Gateway IP добавить в `hosts` запись `<gateway-ip> homework.otus`
+- Проверить маршрутизацию: `curl http://homework.otus/index.html`
+- Проверить rewrite-правило задания со *: `curl http://homework.otus/homepage`
 
 ## PR checklist:
- - [V] Выставлен label с темой домашнего задания
+- [V] Выставлен label с темой домашнего задания

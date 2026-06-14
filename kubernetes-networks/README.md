@@ -1,40 +1,40 @@
 # Разбор домашнего задания: Kubernetes Networks
 
-## 0. Подготовка Windows машины и запуск k3s
+## Выполнено ДЗ №3
 
-### Подготовка Windows ПК
+- Основное ДЗ
+- Задание со *
 
-Чтобы развернуть `k3s` на Windows, удобно использовать WSL2 (Ubuntu):
+## 0. Подготовка Windows машины
 
-1. Включить виртуализацию в BIOS/UEFI (Intel VT-x / AMD-V).
-2. Убедиться, что включены компоненты Windows: **Virtual Machine Platform** и **Windows Subsystem for Linux**.
-3. Установить WSL и Ubuntu:
+### Полезные ссылки для администратора Windows
 
-```powershell
-wsl --install
-```
-
-4. После перезагрузки открыть Ubuntu в WSL и обновить пакеты:
-
-```bash
-sudo apt update && sudo apt upgrade -y
-```
-
-Полезные ссылки:
 - WSL: https://learn.microsoft.com/windows/wsl/install
 - Установка k3s: https://docs.k3s.io/quick-start
 - Установка kubectl: https://kubernetes.io/docs/tasks/tools/
 - Установка Helm: https://helm.sh/docs/intro/install/
 - Установка k9s: https://k9scli.io/topics/install/
 
-### Установка k3s (внутри Ubuntu/WSL)
+### Установка WSL2 и Ubuntu (PowerShell от администратора)
+
+```powershell
+wsl --install
+```
+
+После перезагрузки открыть Ubuntu и выполнить:
+
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+### Установка k3s в Ubuntu/WSL
 
 ```bash
 curl -sfL https://get.k3s.io | sh -
 sudo kubectl get nodes
 ```
 
-Проверка kubeconfig для текущего пользователя:
+Настройка kubeconfig для текущего пользователя:
 
 ```bash
 mkdir -p $HOME/.kube
@@ -43,109 +43,103 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 kubectl get nodes
 ```
 
-### Установка k9s
-
-В Windows PowerShell:
+### Установка и запуск k9s в Windows
 
 ```powershell
 winget install derailed.k9s
-```
-
-Запуск:
-
-```powershell
 k9s
 ```
 
-## 1. Подготовка namespace.yaml
+## 1. В процессе сделано
+
+- Изменена readiness-проба в `deployment.yaml` с `exec` на `httpGet` (`/index.html`, порт `8000`)
+- Создан `service.yaml` типа `ClusterIP` для pod-ов приложения
+- Установлен Gateway API controller Traefik
+- Создан `gateway.yaml` (HTTP listener + `allowedRoutes.namespaces.from: All`)
+- Создан `httpRoute.yaml` для хоста `homework.otus`
+- Добавлено rewrite-правило для задания со `*`: `/homepage` -> `/index.html`
+
+## 2. Как запустить проект
+
+Из директории `kubernetes-networks`:
 
 ```powershell
 kubectl apply -f namespace.yaml
-```
-
-## 2. Подготовка deployment.yaml
-
-В `deployment.yaml` используется `readinessProbe` типа `httpGet` на URL `/index.html`.
-
-```powershell
 kubectl apply -f deployment.yaml
-```
-
-## 3. Подготовка service.yaml (ClusterIP)
-
-```powershell
 kubectl apply -f service.yaml
 ```
 
-## 4. Установка Gateway API контроллера Traefik
+Установка CRD Gateway API:
+
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml
+```
+
+Установка Traefik с поддержкой Gateway API:
 
 ```bash
 helm repo add traefik https://traefik.github.io/charts
 helm repo update
 helm upgrade --install traefik traefik/traefik \
-  --namespace traefik --create-namespace \
-  --set providers.kubernetesGateway.enabled=true
+  -n traefik \
+  --create-namespace \
+  --reset-values \
+  --set providers.kubernetesGateway.enabled=true \
+  --set providers.kubernetesCRD.enabled=false \
+  --set providers.kubernetesIngress.enabled=false \
+  --set service.spec.type=LoadBalancer \
+  --set ports.web.port=8000 \
+  --set ports.web.exposedPort=80 \
+  --set gateway.listeners.web.port=8000
 ```
 
-Проверка:
-
-```bash
-kubectl get gatewayclass
-kubectl get pods -n traefik
-```
-
-## 5. Подготовка gateway.yaml
-
-Gateway создается с HTTP listener и разрешением маршрутов из всех namespace.
+Применение Gateway и HTTPRoute:
 
 ```powershell
 kubectl apply -f gateway.yaml
-```
-
-## 6. Подготовка httpRoute.yaml
-
-`HTTPRoute` маршрутизирует хост `homework.otus` в сервис `homework-service`.
-Дополнительно сделано задание со `*`: rewrite `"/homepage"` в `"/index.html"`.
-
-```powershell
 kubectl apply -f httpRoute.yaml
 ```
 
-## Запуск всего решения
-
-```powershell
-kubectl apply -f namespace.yaml
-kubectl apply -f deployment.yaml
-kubectl apply -f service.yaml
-kubectl apply -f gateway.yaml
-kubectl apply -f httpRoute.yaml
-```
+## 3. Как проверить работоспособность
 
 Проверка ресурсов:
 
 ```powershell
-kubectl get all -n homework
-kubectl get gateway -n homework
-kubectl get httproute -n homework
+kubectl get pods,svc,gateway,httproute -n homework
+kubectl get gatewayclass
+kubectl get pods -n traefik
 ```
 
-## Настройка доступа по хосту homework.otus
+Основной вариант доступа (через IP шлюза):
 
-Вариант для проверки с Windows-хоста:
+1. Узнать IP сервиса Traefik:
 
-1. Добавить в файл `C:\Windows\System32\drivers\etc\hosts` строку:
+```bash
+kubectl get svc traefik -n traefik
+```
+
+2. Добавить в `C:\Windows\System32\drivers\etc\hosts`:
+
+```text
+<gateway-ip> homework.otus
+```
+
+3. Проверить:
+
+```powershell
+curl http://homework.otus/index.html
+curl http://homework.otus/homepage
+```
+
+Альтернативный вариант (через `port-forward`):
 
 ```text
 127.0.0.1 homework.otus
 ```
 
-2. Пробросить порт Traefik в отдельном терминале:
-
 ```bash
 kubectl -n traefik port-forward svc/traefik 80:80
 ```
-
-3. Проверка:
 
 ```powershell
 curl http://homework.otus/index.html
