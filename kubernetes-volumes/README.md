@@ -107,6 +107,7 @@ kind: Config
 preferences: {}
 users: []
 EOF
+rm -f ~/.kube/config
 ```
 
 Если ошибка сохраняется — зарегистрируйте дистрибутивы вручную:
