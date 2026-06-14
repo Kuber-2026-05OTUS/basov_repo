@@ -1,135 +1,69 @@
-# 0. Подготовка Windows-машины (k3s + k9s)
+# Разбор домашнего задания: Kubernetes Volumes
 
-### Что будет в итоге
+## 0. Запускаю Kubernetes через Rancher Desktop (k3s) с управлением через kubectl и k9s
 
-- На Windows будет установлен WSL2 с Ubuntu.
-- Внутри Ubuntu будет установлен и запущен `k3s` (single-node cluster).
-- На Windows будет установлен `k9s` для удобного управления кластером.
-- В кластер будут применены манифесты из каталога `kubernetes-volumes`.
+### Подготовка Windows ПК
 
-### 0.1 Проверка требований на Windows
+### Чтобы Rancher Desktop и k3s корректно запустились, надо:
 
-1. Убедиться, что включена виртуализация в BIOS/UEFI (Intel VT-x / AMD-V).
-2. Открыть PowerShell от имени администратора.
-3. Проверить версию WSL:
-
-```powershell
-wsl --status
-```
-
-Если WSL не установлен, выполнить:
+1. Перезагрузить компьютер и зайти в BIOS/UEFI (Fn+F2, Fn+DEL или F12 при старте).
+2. Найти настройку виртуализации: Intel Virtualization Technology, VT-x, AMD-V, SVM Mode или Secure Virtual Machine.
+3. Включить виртуализацию, сохранить изменения и перезагрузить ПК.
+4. Открыть PowerShell от имени администратора и включить WSL2:
 
 ```powershell
 wsl --install
 ```
 
-После установки перезагрузить Windows.
-
-### 0.2 Установка Ubuntu в WSL2
-
-В PowerShell (администратор):
+5. После установки WSL перезагрузить Windows.
+6. Проверить, что WSL установлен и работает:
 
 ```powershell
-wsl --install -d Ubuntu
-```
-
-После первого запуска Ubuntu создать пользователя Linux и пароль.
-
-Проверить, что дистрибутив работает именно в WSL2:
-
-```powershell
+wsl --status
 wsl -l -v
 ```
 
-### 0.3 Включение systemd в WSL (нужно для k3s)
+### Устанавливаю Rancher Desktop, kubectl и k9s через winget
 
-Нужно открыть Ubuntu и проверить, что статус running:
-
-```bash
-systemctl is-system-running
-```
-
-Если это не так, то требуется поменять конфиг wsl
-
-```bash
-sudo tee /etc/wsl.conf > /dev/null <<'EOF'
-[boot]
-systemd=true
-EOF
-```
-
-В PowerShell:
+Запускаю в PowerShell:
 
 ```powershell
-wsl --shutdown
+winget install -e --id SUSE.RancherDesktop
+winget install -e --id Kubernetes.kubectl
+winget install -e --id Derailed.k9s
 ```
 
-Снова открыть Ubuntu и проверить:
-
-```bash
-systemctl is-system-running
-```
-
-### 0.4 Установка k3s в Ubuntu (WSL2)
-
-В Ubuntu:
-
-```bash
-curl -sfL https://get.k3s.io | sh -
-```
-
-Проверка сервиса:
-
-```bash
-sudo systemctl status k3s --no-pager
-```
-
-Проверка ноды:
-
-```bash
-sudo k3s kubectl get nodes -o wide
-```
-
-### 0.5 Настройка kubeconfig для обычного пользователя
-
-В Ubuntu:
-
-```bash
-mkdir -p ~/.kube
-sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
-sudo chown "$(id -u):$(id -g)" ~/.kube/config
-chmod 600 ~/.kube/config
-```
-
-Проверка:
-
-```bash
-kubectl get nodes
-```
-
-Если `kubectl` не найден, использовать встроенный:
-
-```bash
-sudo k3s kubectl get nodes
-```
-
-### 0.6 Установка k9s на Windows
-
-В PowerShell:
+Проверка, что утилиты доступны:
 
 ```powershell
-winget install k9s
-```
-
-Проверка:
-
-```powershell
+kubectl version --client
 k9s version
 ```
 
-## 1. Подготовка namespace.yaml
+### Первичный запуск и настройка Rancher Desktop
 
-Файл `namespace.yaml`:
+1. Запустить Rancher Desktop из меню Start.
+2. На первом экране выбрать:
+   - `Container Engine`: `containerd` (или `dockerd`, если нужен Docker CLI);
+   - `Enable Kubernetes`: включено;
+   - `Kubernetes version`: стабильную версию по умолчанию.
+3. Дождаться статуса `Kubernetes is running`.
+4. В Settings -> Kubernetes проверить:
+   - Kubernetes включен;
+   - backend: `k3s`;
+   - порт API-сервера по умолчанию не конфликтует с локальными сервисами.
+5. В Settings -> WSL Integration включить интеграцию с используемым Linux-дистрибутивом (если работаете через WSL).
+
+Проверка кластера:
+
+```powershell
+kubectl config current-context
+kubectl get nodes -o wide
+```
+
+## 1. Создание namespace.yaml
+
+Подготовка `namespace.yaml`:
 
 ```yaml
 apiVersion: v1
@@ -140,13 +74,13 @@ metadata:
 
 Применение:
 
-```bash
+```powershell
 kubectl apply -f namespace.yaml
 ```
 
-## 2. Подготовка storageClass.yaml (задание со *)
+## 2. Создание storageClass.yaml (задание со *)
 
-Файл `storageClass.yaml`:
+Подготовка `storageClass.yaml`:
 
 ```yaml
 apiVersion: storage.k8s.io/v1
@@ -160,14 +94,14 @@ volumeBindingMode: Immediate
 
 Применение:
 
-```bash
+```powershell
 kubectl apply -f storageClass.yaml
-kubectl get storageclass
+kubectl get sc
 ```
 
-## 3. Подготовка pvc.yaml
+## 3. Создание pvc.yaml
 
-Файл `pvc.yaml`:
+Подготовка `pvc.yaml`:
 
 ```yaml
 apiVersion: v1
@@ -186,15 +120,15 @@ spec:
 
 Применение:
 
-```bash
+```powershell
 kubectl apply -f pvc.yaml
 kubectl get pvc -n homework
 kubectl get pv
 ```
 
-## 4. Подготовка cm.yaml
+## 4. Создание cm.yaml
 
-Файл `cm.yaml`:
+Подготовка `cm.yaml`:
 
 ```yaml
 apiVersion: v1
@@ -212,31 +146,30 @@ data:
 
 Применение:
 
-```bash
+```powershell
 kubectl apply -f cm.yaml
 kubectl get configmap -n homework
 ```
 
-## 5. Подготовка deployment.yaml
+## 5. Обновление deployment.yaml
 
-В `deployment.yaml`:
+В `deployment.yaml` сделано:
 
-- общий volume `homework-volume` переведен с `emptyDir` на `PersistentVolumeClaim`;
-- добавлен volume `homework-config-volume` из `ConfigMap`;
-- основной контейнер монтирует ConfigMap в `/homework/conf`;
-- nginx настроен так, чтобы путь `/conf/file` отдавал файл из ConfigMap.
+- `emptyDir` заменен на `PersistentVolumeClaim` (`homework-pvc`);
+- добавлен volume из `ConfigMap` и mount в `/homework/conf`;
+- настроена выдача содержимого ConfigMap по URL `/conf/file`.
 
 Применение:
 
-```bash
+```powershell
 kubectl apply -f deployment.yaml
 ```
 
-## 6. Запуск всех манифестов
+## 6. Запуск всего решения
 
 Из каталога `kubernetes-volumes`:
 
-```bash
+```powershell
 kubectl apply -f namespace.yaml
 kubectl apply -f storageClass.yaml
 kubectl apply -f pvc.yaml
@@ -244,26 +177,26 @@ kubectl apply -f cm.yaml
 kubectl apply -f deployment.yaml
 ```
 
-Проверка ресурсов:
+Проверка состояния:
 
-```bash
+```powershell
 kubectl get sc
 kubectl get pvc,pv -n homework
-kubectl get deploy,rs,pods -n homework -o wide
+kubectl get deployments,rs,pods -n homework -o wide
 kubectl rollout status deployment/homework-deployment -n homework
 ```
 
-## 7. Проверка доступности ConfigMap по URL /conf/file
+## 7. Проверка, что /conf/file отдается из ConfigMap
 
-### Вариант A: через port-forward
+Запускаю проброс порта:
 
-```bash
+```powershell
 kubectl port-forward -n homework deployment/homework-deployment 8000:8000
 ```
 
-В другом терминале:
+Во втором терминале:
 
-```bash
+```powershell
 curl http://127.0.0.1:8000/conf/file
 ```
 
@@ -273,30 +206,32 @@ curl http://127.0.0.1:8000/conf/file
 homework-config-volume
 ```
 
-### Вариант B: через exec в pod
+Дополнительно можно проверить напрямую в pod:
 
-```bash
+```powershell
 kubectl get pods -n homework -l app=homework
 kubectl exec -it -n homework <pod-name> -- cat /homework/conf/file
 ```
 
 ## 8. Проверка через k9s
 
-1. В PowerShell или Ubuntu запустить:
+Запуск:
 
-```bash
+```powershell
 k9s
 ```
 
-2. В интерфейсе k9s:
-   - выбрать namespace `homework`;
-   - проверить `pods`, `deployments`, `pvc`, `configmaps`;
-   - открыть pod `homework` и посмотреть mounted volume.
+В интерфейсе k9s:
 
-## 9. Полезные команды администратору
+- переключиться в namespace `homework`;
+- проверить `pods`, `deployments`, `pvc`, `configmaps`;
+- убедиться, что pod в статусе `Running` и рестартов нет.
 
-```bash
+## 9. Полезные команды администратора
+
+```powershell
 kubectl describe pvc homework-pvc -n homework
+kubectl describe deployment homework-deployment -n homework
 kubectl describe pod -n homework <pod-name>
 kubectl logs -n homework <pod-name>
 kubectl delete -f deployment.yaml
