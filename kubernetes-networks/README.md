@@ -161,6 +161,8 @@ helm repo add traefik https://traefik.github.io/charts
 helm repo update
 
 helm delete traefik -n traefik --ignore-not-found
+helm show crds traefik/traefik | kubectl apply --server-side --force-conflicts -f -
+
 helm upgrade --install traefik traefik/traefik -n traefik --create-namespace --set providers.kubernetesGateway.enabled=true --set providers.kubernetesCRD.enabled=false --set providers.kubernetesIngress.enabled=false
 ```
 
