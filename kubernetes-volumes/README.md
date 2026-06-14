@@ -43,7 +43,13 @@ wsl -l -v
 
 ### 0.3 Включение systemd в WSL (нужно для k3s)
 
-В Ubuntu:
+Нужно открыть Ubuntu и проверить, что статус running:
+
+```bash
+systemctl is-system-running
+```
+
+Если это не так, то требуется поменять конфиг wsl
 
 ```bash
 sudo tee /etc/wsl.conf > /dev/null <<'EOF'
