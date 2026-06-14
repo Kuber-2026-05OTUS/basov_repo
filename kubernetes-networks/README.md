@@ -159,6 +159,8 @@ kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/downloa
 ```powershell
 helm repo add traefik https://traefik.github.io/charts
 helm repo update
+
+helm delete traefik -n traefik --ignore-not-found
 helm upgrade --install traefik traefik/traefik -n traefik --create-namespace --set providers.kubernetesGateway.enabled=true --set providers.kubernetesCRD.enabled=false --set providers.kubernetesIngress.enabled=false
 ```
 
