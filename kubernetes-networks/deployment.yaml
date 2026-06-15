@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homework-deployment
+  namespace: homework
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: homework
+  template:
+    metadata:
+      labels:
+        app: homework
+    spec:
+      nodeSelector:
+        homework: "true"
+      initContainers:
+        - name: init-container
+          image: busybox
+          command:
+            - wget
+            - -O
+            - /init/index.html
+            - http://example.com
+          volumeMounts:
+            - name: homework-volume
+              mountPath: /init
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          ports:
+            - containerPort: 8000
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              ln -sf /homework/index.html /usr/share/nginx/html/index.html
+              sed -i 's/listen       80;/listen       8000;/g' /etc/nginx/conf.d/default.conf
+              nginx -g 'daemon off;'
+          readinessProbe:
+            httpGet:
+              path: /index.html
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - rm -f /homework/index.html
+          volumeMounts:
+            - name: homework-volume
+              mountPath: /homework
+      volumes:
+        - name: homework-volume
+          emptyDir: {}
