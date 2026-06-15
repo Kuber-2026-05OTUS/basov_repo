@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homework-config
+  namespace: homework
+data:
+  file: |
+    homework-config-volume
+  app.properties: |
+    mode=training
+    source=configmap
