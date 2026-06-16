@@ -68,7 +68,7 @@ spec:
         - wget
         - "-O"
         - "/init/index.html"
-        - https://github.com/bralbral
+        - https://github.com/basov
         volumeMounts:
         - name: shared-index-html
           mountPath: /init

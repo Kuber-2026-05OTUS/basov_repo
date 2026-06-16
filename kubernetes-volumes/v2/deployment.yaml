@@ -54,7 +54,7 @@ spec:
         command:
         - sh
         - -c
-        - wget -O /init/index.html https://github.com/bralbral
+        - wget -O /init/index.html https://github.com/basov
         volumeMounts:
         - name: shared-data
           mountPath: /init

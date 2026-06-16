@@ -9,14 +9,14 @@
 - `kubectl get gatewayclass`
 
 ```bash
-ubuntu@ubuntu-MS-7C52:~/otus/bralbral_repo/kubernetes-networks$ kubectl get gatewayclass
+ubuntu@ubuntu-YO.HONOR:~/otus/basov_repo/kubernetes-networks$ kubectl get gatewayclass
 error: the server doesn't have a resource type "gatewayclass"
 ```
 
 - `kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.1/standard-install.yaml`
 
 ```bash
-ubuntu@ubuntu-MS-7C52:~/otus/bralbral_repo/kubernetes-networks$ kubectl get gatewayclass
+ubuntu@ubuntu-YO.HONOR:~/otus/basov_repo/kubernetes-networks$ kubectl get gatewayclass
 No resources found
 
 ```
@@ -29,7 +29,7 @@ No resources found
 
 
 ```bash
-ubuntu@ubuntu-MS-7C52:~/otus/bralbral_repo/kubernetes-networks$ helm repo add traefik https://traefik.github.io/charts && helm repo update && \
+ubuntu@ubuntu-YO.HONOR:~/otus/basov_repo/kubernetes-networks$ helm repo add traefik https://traefik.github.io/charts && helm repo update && \
 helm install traefik traefik/traefik --namespace traefik --create-namespace -f ./additional/helm/traefic-values.yaml
 "traefik" already exists with the same configuration, skipping
 Hang tight while we grab the latest from your chart repositories...
@@ -54,7 +54,7 @@ You will need to install them yourself before deploying Traefik v3.7:
 ```
 
 ```bash
-ubuntu@ubuntu-MS-7C52:~/otus/bralbral_repo/kubernetes-networks$ kubectl get gatewayclass
+ubuntu@ubuntu-YO.HONOR:~/otus/basov_repo/kubernetes-networks$ kubectl get gatewayclass
 NAME      CONTROLLER                      ACCEPTED   AGE
 traefik   traefik.io/gateway-controller   True       81s
 ```
@@ -63,9 +63,9 @@ traefik   traefik.io/gateway-controller   True       81s
 - `kubectl apply -f gateway.yaml`
 
 ```bash
-ubuntu@ubuntu-MS-7C52:~/otus/bralbral_repo/kubernetes-networks$ kubectl apply -f gateway.yaml 
+ubuntu@ubuntu-YO.HONOR:~/otus/basov_repo/kubernetes-networks$ kubectl apply -f gateway.yaml 
 gateway.gateway.networking.k8s.io/homework-gateway created
-ubuntu@ubuntu-MS-7C52:~/otus/bralbral_repo/kubernetes-networks$ kubectl get gateway
+ubuntu@ubuntu-YO.HONOR:~/otus/basov_repo/kubernetes-networks$ kubectl get gateway
 NAME               CLASS     ADDRESS   PROGRAMMED   AGE
 homework-gateway   traefik                          12s
 ```
@@ -73,9 +73,9 @@ homework-gateway   traefik                          12s
 - `kubectl apply -f service.yaml`
 
 ```bash
-ubuntu@ubuntu-MS-7C52:~/otus/bralbral_repo/kubernetes-networks$ kubectl apply -f service.yaml 
+ubuntu@ubuntu-YO.HONOR:~/otus/basov_repo/kubernetes-networks$ kubectl apply -f service.yaml 
 service/basov-service created
-ubuntu@ubuntu-MS-7C52:~/otus/bralbral_repo/kubernetes-networks$ kubectl get svc
+ubuntu@ubuntu-YO.HONOR:~/otus/basov_repo/kubernetes-networks$ kubectl get svc
 NAME            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
 basov-service   ClusterIP   10.108.71.217   <none>        8000/TCP   2s
 ```
@@ -84,9 +84,9 @@ basov-service   ClusterIP   10.108.71.217   <none>        8000/TCP   2s
 - `kubectl apply -f httpRoute.yaml`
 
 ```bash
-ubuntu@ubuntu-MS-7C52:~/otus/bralbral_repo/kubernetes-networks$ kubectl apply -f httpRoute.yaml 
+ubuntu@ubuntu-YO.HONOR:~/otus/basov_repo/kubernetes-networks$ kubectl apply -f httpRoute.yaml 
 httproute.gateway.networking.k8s.io/homework-route created
-ubuntu@ubuntu-MS-7C52:~/otus/bralbral_repo/kubernetes-networks$ kubectl get httproute
+ubuntu@ubuntu-YO.HONOR:~/otus/basov_repo/kubernetes-networks$ kubectl get httproute
 NAME             HOSTNAMES           AGE
 homework-route   ["homework.otus"]   5s
 ```
@@ -100,7 +100,7 @@ helm upgrade --install traefik traefik/traefik \
 `kubectl get gateway -n homework`
 
 ```bash
-ubuntu@ubuntu-MS-7C52:~$ kubectl get gateway -n homework
+ubuntu@ubuntu-YO.HONOR:~$ kubectl get gateway -n homework
 NAME               CLASS     ADDRESS        PROGRAMMED   AGE
 homework-gateway   traefik   10.99.131.10   True         34m
 ```
