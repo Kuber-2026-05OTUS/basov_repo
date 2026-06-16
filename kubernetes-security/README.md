@@ -1,36 +1,97 @@
 # Разбор домашнего задания: Kubernetes Security
 
-## Что реализовано
+## 0. Подготовка Windows машины (minikube + k9s)
 
-- ServiceAccount `monitoring` в namespace `homework`.
-- Права для `monitoring` на чтение не-ресурсного URL `/metrics` (через `ClusterRole` + `ClusterRoleBinding`).
-- Deployment запускается под `serviceAccountName: monitoring`.
-- ServiceAccount `cd` в namespace `homework`.
-- `RoleBinding` для `cd` на встроенную роль `admin` в рамках namespace `homework`.
-- Шаги для генерации `kubeconfig` для `cd`.
-- Шаги для генерации токена для `cd` на 1 день в файл `token`.
-- Задание со `*`: при старте pod запрашивает `/metrics`, сохраняет ответ в `metrics.html`, файл доступен через сервис по пути `/metrics.html`.
+### Чтобы minikube на Windows работал стабильно, надо:
 
-## Файлы
+1. Перезагрузить ПК и включить виртуализацию в BIOS/UEFI (`Intel VT-x` / `AMD-V` / `SVM Mode`).
+2. Включить в Windows компоненты `Virtual Machine Platform` и `Windows Subsystem for Linux`.
+3. Перезагрузить Windows.
+4. Установить инструменты через PowerShell (от имени администратора).
 
-- `namespace.yaml`
-- `monitoring-rbac.yaml`
-- `cd-rbac.yaml`
-- `deployment.yaml`
-- `service.yaml`
-- `.gitignore` (игнорирует локальные секреты `token` и `kubeconfig-cd`)
+### Установка инструментов
 
-## Применение манифестов
+```powershell
+winget install Kubernetes.kubectl
+winget install Kubernetes.minikube
+winget install derailed.k9s
+```
+
+Проверка:
+
+```powershell
+kubectl version --client
+minikube version
+k9s version
+```
+
+Ожидаемый результат: все 3 команды выводят версии без ошибок.
+
+### Запуск minikube
+
+```powershell
+minikube start
+kubectl config current-context
+kubectl get nodes
+```
+
+Ожидаемый результат:
+
+- контекст переключен на `minikube`;
+- минимум 1 node в статусе `Ready`.
+
+### Запуск k9s (опционально, для контроля)
+
+```powershell
+k9s
+```
+
+Ожидаемый результат: открывается интерфейс кластера, видны namespace и pods.
+
+---
+
+## 1. Переход в директорию ДЗ
+
+```powershell
+cd .\kubernetes-security
+```
+
+Ожидаемый результат: все дальнейшие команды выполняются в папке `kubernetes-security`.
+
+---
+
+## 2. Применение namespace и RBAC
+
+### Применение манифестов
 
 ```powershell
 kubectl apply -f namespace.yaml
 kubectl apply -f monitoring-rbac.yaml
 kubectl apply -f cd-rbac.yaml
-kubectl apply -f deployment.yaml
-kubectl apply -f service.yaml
 ```
 
-## Проверка прав ServiceAccount `monitoring`
+Ожидаемый результат:
+
+- namespace `homework` создан;
+- ServiceAccount `monitoring` и `cd` созданы;
+- созданы роли и bindings.
+
+### Проверка созданных объектов
+
+```powershell
+kubectl get sa -n homework
+kubectl get rolebinding -n homework
+kubectl get clusterrole monitoring-metrics-reader
+kubectl get clusterrolebinding monitoring-metrics-reader
+```
+
+Ожидаемый результат:
+
+- в `kubectl get sa -n homework` есть `monitoring` и `cd`;
+- в `kubectl get rolebinding -n homework` есть `cd-admin`;
+- есть `ClusterRole` и `ClusterRoleBinding` для чтения `/metrics`.
+
+### Проверка прав ServiceAccount `monitoring` на `/metrics`
 
 ```powershell
 kubectl auth can-i --as=system:serviceaccount:homework:monitoring get /metrics
@@ -38,7 +99,44 @@ kubectl auth can-i --as=system:serviceaccount:homework:monitoring get /metrics
 
 Ожидаемый результат: `yes`.
 
-## Создание kubeconfig для ServiceAccount `cd`
+---
+
+## 3. Применение deployment и service
+
+```powershell
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+```
+
+Ожидаемый результат:
+
+- deployment `homework-deployment` создан;
+- сервис `homework-service` создан;
+- pod запускаются под `ServiceAccount monitoring`.
+
+### Проверка статуса workload
+
+```powershell
+kubectl get deploy,rs,pods,svc -n homework
+kubectl rollout status deployment/homework-deployment -n homework
+```
+
+Ожидаемый результат:
+
+- `AVAILABLE` у deployment равно желаемому количеству реплик;
+- rollout завершен сообщением `successfully rolled out`.
+
+### Проверка serviceAccount в pod
+
+```powershell
+kubectl get pods -n homework -l app=homework -o jsonpath="{.items[0].spec.serviceAccountName}"
+```
+
+Ожидаемый результат: `monitoring`.
+
+---
+
+## 4. Создание kubeconfig для ServiceAccount `cd`
 
 ```powershell
 $clusterName = kubectl config view --minify -o jsonpath='{.clusters[0].name}'
@@ -52,36 +150,82 @@ kubectl config set-context cd@homework --cluster=$clusterName --user=cd --namesp
 kubectl config use-context cd@homework --kubeconfig=.\kubeconfig-cd
 ```
 
-Проверка:
+Ожидаемый результат:
+
+- в папке появляется файл `kubeconfig-cd`;
+- контекст `cd@homework` успешно создается.
+
+### Проверка прав в новом kubeconfig
 
 ```powershell
 kubectl --kubeconfig .\kubeconfig-cd auth can-i create deployment -n homework
+kubectl --kubeconfig .\kubeconfig-cd auth can-i delete pod -n homework
 ```
 
-## Генерация токена `cd` на 1 день
+Ожидаемый результат: для namespace `homework` команды возвращают `yes` (роль `admin`).
+
+---
+
+## 5. Генерация токена `cd` на 1 день
 
 ```powershell
 kubectl -n homework create token cd --duration=24h | Out-File -Encoding ascii .\token
-```
-
-Проверка содержимого:
-
-```powershell
 Get-Content .\token
 ```
 
-## Проверка задания со `*`
+Ожидаемый результат:
 
-Проброс порта сервиса:
+- в папке создан файл `token`;
+- содержимое файла похоже на JWT (три части, разделенные точками).
+
+---
+
+## 6. Проверка задания со `*` (`/metrics.html`)
+
+В `deployment.yaml` уже настроен init-контейнер, который:
+
+1. Берет SA token из `/var/run/secrets/kubernetes.io/serviceaccount/token`;
+2. Запрашивает `https://kubernetes.default.svc/metrics`;
+3. Сохраняет ответ в `/work/metrics.html`.
+
+Далее nginx отдает файл по пути `/metrics.html`.
+
+### Проверка файла внутри pod
+
+```powershell
+$pod = kubectl get pod -n homework -l app=homework -o jsonpath="{.items[0].metadata.name}"
+kubectl exec -n homework $pod -- ls -l /homework
+kubectl exec -n homework $pod -- sh -c "wc -c /homework/metrics.html"
+```
+
+Ожидаемый результат:
+
+- файл `/homework/metrics.html` существует;
+- его размер больше 0 байт.
+
+### Проверка через сервис
 
 ```powershell
 kubectl -n homework port-forward svc/homework-service 8080:80
 ```
 
-В другом терминале:
+В отдельном окне PowerShell:
 
 ```powershell
 curl http://127.0.0.1:8080/metrics.html
 ```
 
-Если файл виден, значит init-контейнер успешно получил `/metrics` и сохранил ответ в общий том.
+Ожидаемый результат: возвращается содержимое метрик Kubernetes API.
+
+---
+
+## 7. Полезные команды диагностики
+
+```powershell
+kubectl get events -n homework --sort-by=.metadata.creationTimestamp
+kubectl describe pod -n homework $pod
+kubectl logs -n homework $pod -c init-metrics
+kubectl auth can-i --list --as=system:serviceaccount:homework:cd -n homework
+```
+
+Ожидаемый результат: по логам `init-metrics` видно успешный `curl` без ошибок авторизации.
