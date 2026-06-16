@@ -1,7 +1,7 @@
-### A. kubernetes-intro
+### A. kubernetes-intro-v2
 
 ```bash
-kubectl create -f ./kubernetes-intro/namespace.yaml
+kubectl create -f ./kubernetes-intro-v2/namespace.yaml
 ```
 
 ```bash
@@ -13,7 +13,7 @@ kubectl config view --minify | grep namespace
 ```
 
 ```bash
-kubectl apply -f ./kubernetes-intro/pod.yaml
+kubectl apply -f ./kubernetes-intro-v2/pod.yaml
 ```
 
 
@@ -35,7 +35,7 @@ kubectl exec -it basov -- sh
 
 ```bash
 kubectl delete pod basov -n homework
-kubectl apply -f ./kubernetes-intro/pod.yaml
+kubectl apply -f ./kubernetes-intro-v2/pod.yaml
 ```
 
 ```bash

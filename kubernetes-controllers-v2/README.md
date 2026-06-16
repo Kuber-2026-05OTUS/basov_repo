@@ -9,7 +9,7 @@ kubectl label node minikube homework=true
 ```
 
 ```bash
-kubectl apply -f ./kubernetes-controllers
+kubectl apply -f ./kubernetes-controllers-v2
 ```
 
 ```bash
