@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: basov-deployment
+  namespace: homework
+  labels:
+    app: basov
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: basov
+  template:
+    metadata:
+      labels:
+        app: basov
+    spec:
+      containers:
+      - name: nginx-fork
+        image: docker.basov.software/basov:1.11.6-minimal
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: shared-data 
+          mountPath: /homework
+        - name: basov-config
+          mountPath: /etc/basov/http.d/default.conf
+          subPath: basov-default.conf
+        - name: homework-conf
+          mountPath: /homework/conf
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                - sh
+                - -c
+                - "rm -f /homework/index.html && sleep 5"
+        readinessProbe:
+          httpGet:
+            path: /index.html
+            port: 8000
+          initialDelaySeconds: 3
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+      initContainers:
+      - name: wget-index-html
+        image: busybox:1.38.0
+        command:
+        - sh
+        - -c
+        - wget -O /init/index.html https://github.com/bralbral
+        volumeMounts:
+        - name: shared-data
+          mountPath: /init
+      volumes:
+      - name: shared-data
+        persistentVolumeClaim:
+          claimName: homework-pvc
+      - name: basov-config 
+        configMap:
+          name: config
+      - name: homework-conf
+        configMap:
+          name: config
