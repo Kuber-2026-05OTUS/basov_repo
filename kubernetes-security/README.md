@@ -29,11 +29,12 @@ minikube version
 k9s version
 ```
 
-Ожидаемый результат: все команды выводят версии без ошибок.
+Ожидаемый результат: все 3 команды выводят версии без ошибок.
 
 ### Запуск minikube из под Git Bash:
 
 ```text
+minikube delete
 minikube config set driver qemu2
 minikube start
 kubectl config current-context
