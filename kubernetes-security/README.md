@@ -27,9 +27,10 @@ k9s version
 
 Ожидаемый результат: все 3 команды выводят версии без ошибок.
 
-### Запуск minikube
+### Запуск minikube из под Git Bash:
 
-```powershell
+```text
+minikube config set driver qemu2
 minikube start
 kubectl config current-context
 kubectl get nodes
