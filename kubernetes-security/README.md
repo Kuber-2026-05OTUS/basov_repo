@@ -128,7 +128,7 @@ kubectl config use-context minikube
 ## 1. Переход в директорию ДЗ
 
 ```powershell
-cd .\kubernetes-security
+cd kubernetes-security
 ```
 
 Ожидаемый результат: все дальнейшие команды выполняются в папке `kubernetes-security`.
