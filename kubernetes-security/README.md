@@ -2,12 +2,16 @@
 
 ## 0. Подготовка Windows машины (minikube + k9s)
 
-### Чтобы minikube на Windows работал стабильно, надо:
+### Чтобы minikube мог запуститься, надо:
 
-1. Перезагрузить ПК и включить виртуализацию в BIOS/UEFI (`Intel VT-x` / `AMD-V` / `SVM Mode`).
-2. Включить в Windows компоненты `Virtual Machine Platform` и `Windows Subsystem for Linux`.
-3. Перезагрузить Windows.
-4. Установить инструменты через PowerShell (от имени администратора).
+1. Перезагрузить компьютер и зайти в BIOS/UEFI (Fn+F2, Fn+DEL или F12 при старте нажать).
+2. Найти настройку виртуализации: она может называться Intel Virtualization Technology, VT-x, AMD-V, SVM Mode или Secure Virtual Machine.
+3. Включить её, сохранить изменения и перезагрузить ПК.
+4. Чтобы отключить быстрый запуск в Windows, надо открыть Панель управления → Электропитание → Действия кнопок питания, нажать «Изменение параметров, которые сейчас недоступны», снять галочку с «Включить быстрый запуск» и нажать «Сохранить изменения».
+5. Скачать установщик QEMU для Windows с официального сайта: https://www.qemu.org/download/#windows
+6. Установить qemu, обязательно отметив галочку "Add to PATH" при установке
+7. Добавить через Win + R, введя sysdm.cpl и нажав Enter, перейдя на вкладку «Дополнительно» и нажав «Переменные среды» в разделе «Переменные среды пользователя» Path - изменить - в конце добавить c:\Program Files\qemu
+8. Перезагрузить Windows
 
 ### Установка инструментов
 
@@ -27,9 +31,11 @@ k9s version
 
 Ожидаемый результат: все 3 команды выводят версии без ошибок.
 
-### Запуск minikube
+### Запуск minikube из под Git Bash:
 
-```powershell
+```text
+minikube delete
+minikube config set driver qemu2
 minikube start
 kubectl config current-context
 kubectl get nodes
@@ -40,7 +46,7 @@ kubectl get nodes
 - контекст переключен на `minikube`;
 - минимум 1 node в статусе `Ready`.
 
-### Запуск k9s (опционально, для контроля)
+### Запуск k9s из-под PowerShell (опционально, для контроля)
 
 ```powershell
 k9s
