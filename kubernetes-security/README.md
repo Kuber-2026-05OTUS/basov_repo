@@ -133,6 +133,71 @@ cd kubernetes-security
 
 Ожидаемый результат: все дальнейшие команды выполняются в папке `kubernetes-security`.
 
+
+В этой папке у нас создан файл namespace.yaml
+```text
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: homework
+```
+
+Также в этой папке у нас создан файл monitoring-rbac.yaml
+```text
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: monitoring
+  namespace: homework
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: monitoring-metrics-reader
+rules:
+  - nonResourceURLs:
+      - /metrics
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: monitoring-metrics-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: monitoring-metrics-reader
+subjects:
+  - kind: ServiceAccount
+    name: monitoring
+    namespace: homework
+```
+
+И в этой папке у нас создан файл cd-rbac.yaml
+```text
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cd
+  namespace: homework
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cd-admin
+  namespace: homework
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admin
+subjects:
+  - kind: ServiceAccount
+    name: cd
+    namespace: homework
+
+```
+
 ---
 
 ## 2. Применение namespace и RBAC
