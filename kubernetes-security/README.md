@@ -1,68 +1,3 @@
-# Kubernetes Security
-
-В каталоге находятся манифесты для выполнения домашнего задания:
-
-- `namespace.yaml`
-- `security.yaml`
-- `config-map.yaml`
-- `deployment.yaml`
-
-## Быстрый запуск
-
-```powershell
-minikube delete
-minikube start
-
-cd kubernetes-security
-kubectl apply -f namespace.yaml
-kubectl apply -f security.yaml
-kubectl apply -f config-map.yaml
-kubectl apply -f deployment.yaml
-```
-
-## Проверка ресурсов
-
-```powershell
-kubectl get ns homework
-kubectl get sa -n homework
-kubectl get clusterrole metrics-access
-kubectl get clusterrolebinding monitoring-metrics-access
-kubectl get rolebinding cd-admin -n homework
-kubectl get deploy,pods -n homework
-kubectl rollout status deployment/basov-deployment -n homework
-```
-
-## Проверка доступа к `/metrics`
-
-```powershell
-kubectl auth can-i --as=system:serviceaccount:homework:monitoring get /metrics
-```
-
-Ожидаемый результат: `yes`.
-
-## Проверка страницы метрик
-
-```powershell
-kubectl port-forward -n homework deployment/basov-deployment 8080:8000
-curl http://127.0.0.1:8080/metrics.html
-```
-
-Ожидаемый результат: возвращается содержимое метрик Kubernetes API.
-
-## Генерация kubeconfig для `cd`
-
-```powershell
-kubectl create token cd -n homework --duration 24h > token
-$API_SERVER = kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}'
-kubectl get configmap kube-root-ca.crt -n kube-public -o jsonpath='{.data.ca\.crt}' > cluster-ca.crt
-
-kubectl config set-cluster homework-cluster --server=$API_SERVER --certificate-authority=cluster-ca.crt --embed-certs=true --kubeconfig=cd.kubeconfig
-kubectl config set-credentials cd --token=(Get-Content token) --kubeconfig=cd.kubeconfig
-kubectl config set-context cd-context --cluster=homework-cluster --user=cd --namespace=homework --kubeconfig=cd.kubeconfig
-kubectl config use-context cd-context --kubeconfig=cd.kubeconfig
-
-kubectl --kubeconfig=cd.kubeconfig get pods -n homework
-```
 # Разбор домашнего задания: Kubernetes Security
 
 ## 0. Подготовка Windows машины (minikube + k9s)
@@ -207,18 +142,25 @@ metadata:
   name: homework
 ```
 
-Также в этой папке у нас создан файл monitoring-rbac.yaml
+Также в этой папке у нас создан файл security.yaml
 ```text
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: monitoring
   namespace: homework
 ---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cd
+  namespace: homework
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: monitoring-metrics-reader
+  name: metrics-access
 rules:
   - nonResourceURLs: ["/metrics"]
     verbs: ["get"]
@@ -226,24 +168,15 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: monitoring-metrics-reader
+  name: monitoring-metrics-access
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: monitoring-metrics-reader
+  name: metrics-access
 subjects:
   - kind: ServiceAccount
     name: monitoring
     namespace: homework
-```
-
-И в этой папке у нас создан файл cd-rbac.yaml
-```text
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: cd
-  namespace: homework
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -260,6 +193,27 @@ subjects:
     namespace: homework
 ```
 
+И в этой папке у нас создан файл config-map.yaml
+```text
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: basov-config
+  namespace: homework
+data:
+  default.conf: |
+    server {
+        listen 8000;
+
+        root /homework;
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+    }
+```
+
 ---
 
 ## 2. Применение namespace и RBAC
@@ -268,11 +222,11 @@ subjects:
 
 ```powershell
 kubectl delete -f namespace.yaml
-kubectl delete -f monitoring-rbac.yaml
-kubectl delete -f cd-rbac.yaml
+kubectl delete -f security.yaml
+kubectl delete -f config-map.yaml
 kubectl apply -f namespace.yaml
-kubectl apply -f monitoring-rbac.yaml
-kubectl apply -f cd-rbac.yaml
+kubectl apply -f security.yaml
+kubectl apply -f config-map.yaml
 ```
 
 Ожидаемый результат:
