@@ -155,10 +155,8 @@ kind: ClusterRole
 metadata:
   name: monitoring-metrics-reader
 rules:
-  - nonResourceURLs:
-      - /metrics
-    verbs:
-      - get
+  - nonResourceURLs: ["/metrics"]
+    verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -195,7 +193,6 @@ subjects:
   - kind: ServiceAccount
     name: cd
     namespace: homework
-
 ```
 
 ---
@@ -205,6 +202,9 @@ subjects:
 ### Применение манифестов
 
 ```powershell
+kubectl delete -f namespace.yaml
+kubectl delete -f monitoring-rbac.yaml
+kubectl delete -f cd-rbac.yaml
 kubectl apply -f namespace.yaml
 kubectl apply -f monitoring-rbac.yaml
 kubectl apply -f cd-rbac.yaml
