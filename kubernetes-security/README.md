@@ -46,7 +46,76 @@ kubectl get nodes
 k9s
 ```
 
-Ожидаемый результат: открывается интерфейс кластера, видны namespace и pods.
+Если после запуска видите `Context: rancher-desktop`, `Cluster: rancher-desktop`, `AuthInfo: rancher-desktop`, это значит, что `k9s` не подключился к активному Kubernetes-контексту (minikube).
+
+### Как перенастроить k9s на minikube
+
+1. Выйти из `k9s` (`Ctrl+C`) и проверить, что кластер реально поднят:
+
+```powershell
+kubectl config get-contexts
+kubectl config current-context
+kubectl get nodes
+```
+
+2. Если `current-context` не `minikube` (или ваш рабочий), переключить:
+
+```powershell
+kubectl config use-context minikube
+```
+
+3. Запустить `k9s` снова.
+4. Если вы на экране `contexts(all)` (как в примере), стрелками выбрать нужный контекст (`minikube`) и нажать `Enter`.
+5. Альтернатива без списка: нажать `:` и ввести `ctx minikube`, затем `Enter`.
+6. Проверка: в верхней панели должны появиться не `rancher-desktop`, а реальные `Context`, `Cluster`, `AuthInfo`, а также значения `CPU/MEM`.
+
+### Какие действия делать по ходу задания в k9s
+
+Использую `k9s` как дополнительный контроль после каждого шага ДЗ:
+
+1. **Переключить контекст и namespace**
+   - `:ctx` -> выбрать контекст -> `Enter`
+   - `:ns` -> выбрать `homework` -> `Enter`
+   - `0` -> быстро показать все namespace (проверить, что не "потерялись" объекты в другом namespace)
+2. **Проверка применения манифестов**
+   - `:sa` -> убедиться, что есть `monitoring` и `cd`
+   - `:rb` (RoleBinding) -> проверить `cd-admin`
+   - `:cr` / `:crb` -> проверить cluster-level права для `monitoring`
+3. **Контроль deployment и pod**
+   - `:deploy` -> у `homework-deployment` смотреть `READY`, `AVAILABLE`, `AGE`
+   - `Enter` на deployment -> перейти к связанным pod (или `:po`)
+   - На pod нажать `l` (logs), затем выбрать контейнер (если запросит)
+   - Нажать `d` (describe), если pod не в `Running`
+4. **Проверка сервиса и доступа**
+   - `:svc` -> проверить `homework-service` и его `PORT(S)`
+   - На сервисе `Shift+f` -> сделать port-forward прямо из `k9s`
+   - `:ep` (endpoints) -> убедиться, что у сервиса есть backend pod
+5. **Разбор ошибок**
+   - `:events` -> смотреть свежие ошибки (`FailedScheduling`, `ImagePullBackOff`, `CrashLoopBackOff`)
+   - В любом списке нажать `/` и фильтровать, например `/homework`
+   - `Esc` -> выйти из фильтра/назад, `?` -> подсказка горячих клавиш в текущем экране
+
+### На что обращать внимание в k9s во время выполнения ДЗ
+
+- Вы точно в нужном контексте (верхняя строка не `rancher-desktop` и не чужой кластер).
+- Вы точно в нужном namespace (`homework`), иначе можно решить, что "ничего не создалось".
+- У pod нет частых рестартов и нет статусов `Pending`, `CrashLoopBackOff`, `ImagePullBackOff`.
+- У сервиса есть endpoints; если endpoints пустой, трафик не пойдет.
+- В `events` нет ошибок RBAC (`forbidden`) и ошибок планирования.
+
+### Шпаргалка клавиш k9s для этого ДЗ
+
+- `:` — командный режим (`ctx`, `ns`, `po`, `deploy`, `svc`, `events`)
+- `Enter` — перейти внутрь ресурса/подтвердить выбор
+- `Esc` — назад/отмена
+- `?` — подсказка доступных хоткеев
+- `l` — логи выбранного pod/контейнера
+- `d` — describe выбранного ресурса
+- `y` — YAML выбранного ресурса
+- `Shift+f` — port-forward
+- `/` — фильтр в текущем списке
+
+Итого в k9s в самом конце задания проконтролируем, что открывается интерфейс кластера, видны namespace и pods.
 
 ---
 
