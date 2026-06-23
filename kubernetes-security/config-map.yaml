@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: basov-config
+  namespace: homework
+data:
+  default.conf: |
+    server {
+        listen 8000;
+
+        root /homework;
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ =404;
+        }
+    }
