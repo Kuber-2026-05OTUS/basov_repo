@@ -1,3 +1,4 @@
+# G. kubernetes-operators
 # Методическое пособие
 по выполнению домашнего задания курса
 
@@ -45,12 +46,12 @@ CRD функционируют путем определения новых ти
 
 ### Рекомендуемые источники
 
-- Официальная документация по CRD.
-- Документация по паттерну Operator.
-- Пример создания и конфигурирования CRD.
-- Для написания собственного оператора можно рассмотреть фреймворк Kopf, если вы знакомы с Python. Также можете посмотреть как пример образ контейнера, используемого в задании без * — для написания оператора в нём как раз использовался Kopf.
-- OperatorFramework — предоставляет возможность реализовать оператор на Go либо на Ansible.
-- Если вы уже работали с каким-то другим фреймворком для создания операторов — можете реализовать на нём.
+- Официальная документация по CRD.  https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/
+- Документация по паттерну Operator.  https://kubernetes.io/docs/concepts/extend-kubernetes/operator/
+- Пример создания и конфигурирования CRD.  https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/
+- Для написания собственного оператора можно рассмотреть фреймворк Kopf, если вы знакомы с Python. Также можете посмотреть как пример образ контейнера, используемого в задании без * — для написания оператора в нём как раз использовался Kopf.  https://kopf.readthedocs.io/en/stable/
+- OperatorFramework — предоставляет возможность реализовать оператор на Go либо на Ansible.  https://sdk.operatorframework.io/  https://sdk.operatorframework.io/docs/building-operators/golang/  https://sdk.operatorframework.io/docs/building-operators/ansible/tutorial/
+- Если вы уже работали с каким-то другим фреймворком для создания операторов — можете реализовать на нём.  
 
 ## 4. Пошаговая инструкция выполнения домашнего задания
 
@@ -107,9 +108,9 @@ CRD функционируют путем определения новых ти
 
 ## 7. Рекомендуемые источники
 
-- Официальная документация по CRD.
-- Документация по паттерну Operator.
-- Пример создания и конфигурирования CRD.
-- Для написания собственного оператора можно рассмотреть фреймворк Kopf, если вы знакомы с Python. Также можете посмотреть как пример образ контейнера, используемого в задании без * — для написания оператора в нём как раз использовался Kopf.
-- OperatorFramework — предоставляет возможность реализовать оператор на Go либо на Ansible.
-- Если вы уже работали с каким-то другим фреймворком для создания операторов — можете реализовать на нём.
+- Официальная документация по CRD.  https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/
+- Документация по паттерну Operator.  https://kubernetes.io/docs/concepts/extend-kubernetes/operator/
+- Пример создания и конфигурирования CRD.  https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/
+- Для написания собственного оператора можно рассмотреть фреймворк Kopf, если вы знакомы с Python. Также можете посмотреть как пример образ контейнера, используемого в задании без * — для написания оператора в нём как раз использовался Kopf.  https://kopf.readthedocs.io/en/stable/
+- OperatorFramework — предоставляет возможность реализовать оператор на Go либо на Ansible.  https://sdk.operatorframework.io/  https://sdk.operatorframework.io/docs/building-operators/golang/  https://sdk.operatorframework.io/docs/building-operators/ansible/tutorial/
+- Если вы уже работали с каким-то другим фреймворком для создания операторов — можете реализовать на нём.  
