@@ -45,11 +45,11 @@
 
 ### Рекомендуемые источники
 
-- Установка Helm.
-- Документация по использованию Helm.
-- Создание собственного чарта.
-- Установка Helmfile.
-- Документация по Bitnami Kafka Helm-чарту.
+- Установка Helm.  https://helm.sh/docs/intro/install/
+- Документация по использованию Helm.  https://helm.sh/docs/intro/using_helm/
+- Создание собственного чарта.  https://helm.sh/docs/chart_template_guide/getting_started/
+- Установка Helmfile.  https://helmfile.readthedocs.io/en/latest/#installation
+- Документация по Bitnami Kafka Helm-чарту.  https://github.com/bitnami/charts/tree/main/bitnami/kafka
 
 ## 4. Пошаговая инструкция выполнения домашнего задания
 
@@ -98,8 +98,8 @@
 
 ## 7. Рекомендуемые источники
 
-- Установка Helm.
-- Документация по использованию Helm.
-- Создание собственного чарта.
-- Установка Helmfile.
-- Документация по Bitnami Kafka Helm-чарту.
+- Установка Helm.  https://helm.sh/docs/intro/install/
+- Документация по использованию Helm.  https://helm.sh/docs/intro/using_helm/
+- Создание собственного чарта.  https://helm.sh/docs/chart_template_guide/getting_started/
+- Установка Helmfile.  https://helmfile.readthedocs.io/en/latest/#installation
+- Документация по Bitnami Kafka Helm-чарту.  https://github.com/bitnami/charts/tree/main/bitnami/kafka
