@@ -1,0 +1,130 @@
+# Default values for homework-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 3
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  tag: "alpine"
+
+containerName: nginx
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: false
+
+httpRoute:
+  enabled: false
+
+resources: {}
+
+probes:
+  enabled: true
+
+livenessProbe:
+  httpGet:
+    path: /index.html
+    port: 8000
+  initialDelaySeconds: 3
+  periodSeconds: 5
+readinessProbe:
+  httpGet:
+    path: /index.html
+    port: 8000
+  initialDelaySeconds: 3
+  periodSeconds: 5
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+initContainers:
+  - name: init-container
+    image: busybox
+    command:
+      - wget
+      - -O
+      - /init/index.html
+      - http://example.com
+    volumeMounts:
+      - name: homework-volume
+        mountPath: /init
+
+command:
+  - /bin/sh
+  - -c
+args:
+  - |
+    cat > /etc/nginx/conf.d/default.conf <<'EOF'
+    server {
+      listen 8000;
+      server_name localhost;
+
+      location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+      }
+
+      location /conf/ {
+        alias /homework/conf/;
+      }
+    }
+    EOF
+    ln -sf /homework/index.html /usr/share/nginx/html/index.html
+    nginx -g 'daemon off;'
+
+lifecycle:
+  preStop:
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - rm -f /homework/index.html
+
+volumes:
+  - name: homework-volume
+    emptyDir: {}
+  - name: homework-config-volume
+    configMap:
+      name: homework-config
+
+volumeMounts:
+  - name: homework-volume
+    mountPath: /homework
+  - name: homework-config-volume
+    mountPath: /homework/conf
+    readOnly: true
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Redis dependency configuration
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
