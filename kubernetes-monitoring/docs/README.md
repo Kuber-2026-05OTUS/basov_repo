@@ -77,7 +77,7 @@
 
 ## 7. Рекомендуемые источники
 
-- Документация nginx по сбору метрик CRD.
-- Установка Prometheus Operator — официальная документация.
-- Установка Prometheus Operator через Helm.
-- Конфигурация nginx exporter.
+- Документация nginx по сбору метрик CRD.  https://nginx.org/ru/docs/http/ngx_http_stub_status_module.html
+- Установка Prometheus Operator — официальная документация.  https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/getting-started/installation.md
+- Установка Prometheus Operator через Helm.  https://bitnami.com/stack/prometheus-operator/helm
+- Конфигурация nginx exporter.  https://github.com/nginxinc/nginx-prometheus-exporter
