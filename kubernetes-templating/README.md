@@ -23,6 +23,17 @@ Helmfile позволяет декларативно управлять неск
 Поскольку `helmfile` недоступен в официальном репозитории `winget`, рекомендуется использовать пакетный менеджер `scoop` или скачать бинарный файл напрямую:
 
 **Установка через scoop:**
+
+Сам `scoop` устанавливается одной строкой — установочный скрипт скачивается с официального адреса [get.scoop.sh](https://get.scoop.sh) (исходники: [github.com/ScoopInstaller/Install](https://github.com/ScoopInstaller/Install)). Выполните в обычном (не админском) окне PowerShell:
+```powershell
+# Разрешаем выполнение установочного скрипта для текущего пользователя
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# Скачиваем и запускаем официальный установщик scoop
+Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+```
+
+После установки scoop поставьте сам `helmfile`:
 ```powershell
 scoop install helmfile
 ```
@@ -62,20 +73,50 @@ helm upgrade --install homework-release . -n homework --create-namespace
 
 ## 2. Установка Kafka через Helmfile (Задание 2)
 
-В корне папки `kubernetes-templating` подготовлен файл `helmfile.yaml`, описывающий установку 2 релизов Kafka из Bitnami чарта:
+В папке `kubernetes-templating/kafka` подготовлен файл `helmfile.yaml` и два файла со значениями (`values-prod.yaml`, `values-dev.yaml`), описывающие установку 2 релизов Kafka из Bitnami чарта:
 
-1. **kafka-prod** (в namespace `prod`): 5 брокеров, версия Kafka 3.5.2, протокол клиентских и межброкерных взаимодействий — SASL_PLAINTEXT.
-2. **kafka-dev** (в namespace `dev`): 1 брокер, последняя версия, отключенная авторизация (PLAINTEXT).
+1. **kafka-prod** (в namespace `prod`): 5 брокеров, протокол клиентских и межброкерных взаимодействий — SASL_PLAINTEXT (`controller.replicaCount: 5`).
+2. **kafka-dev** (в namespace `dev`): 1 брокер, отключенная авторизация (PLAINTEXT), `persistence.enabled: false`.
+
+### Важно про образ и версию Kafka
+
+Bitnami закрыл бесплатный доступ к своим образам, поэтому в `values-*.yaml` используется совместимый community-образ `soldevelo/kafka`. В их реестре нет версии `3.5.2`, поэтому взята ближайшая доступная — `3.7.1`. Так как Kafka к этому моменту уже перешла с ZooKeeper на KRaft, нужно зафиксировать версию чарта, совместимую с образом: для Kafka `3.7.1` это чарт `29.3.14` (поэтому он запинен в `helmfile.yaml` через `version: 29.3.14`).
+
+Подобрать версию чарта под образ можно так:
+```powershell
+helm search repo bitnami/kafka --versions
+```
+
+Поскольку чарт от Bitnami, а образ сторонний, в `values-*.yaml` добавлен флаг, разрешающий несовместимые образы:
+```yaml
+global:
+  security:
+    allowInsecureImages: true
+```
+
+### Плагин helm-diff
+
+`helmfile apply` использует под капотом `helm diff`. Если плагин не установлен, команда упадёт с ошибкой `unknown command "diff" for "helm"`. Установите плагин один раз:
+```powershell
+helm plugin install https://github.com/databus23/helm-diff
+helm plugin list
+```
 
 ### Развертывание с помощью Helmfile
 
-Выполните команду в папке `kubernetes-templating`:
+Выполните команду в папке `kubernetes-templating/kafka`:
 
 ```powershell
+cd kubernetes-templating/kafka
+
+# (опционально) посмотреть итоговые манифесты с подстановками
+helmfile template
+
+# установить/обновить релизы
 helmfile apply
 ```
 
-Эта команда автоматически добавит необходимые репозитории (bitnami), создаст namespace-ы и установит/обновит релизы Kafka согласно конфигурации.
+Эта команда автоматически добавит необходимый репозиторий (bitnami), создаст namespace-ы и установит/обновит релизы Kafka согласно конфигурации.
 
 ## 3. Проверка работоспособности
 
@@ -103,6 +144,6 @@ kubectl get pods -n homework
 helm uninstall homework-release -n homework
 kubectl delete namespace homework
 
-# Удаление Kafka
+# Удаление Kafka (выполнять в папке kubernetes-templating/kafka)
 helmfile destroy
 ```

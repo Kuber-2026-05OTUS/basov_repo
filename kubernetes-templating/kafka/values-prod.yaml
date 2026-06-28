@@ -1,0 +1,30 @@
+image:
+  repository: soldevelo/kafka
+  tag: 3.7.1
+
+global:
+  security:
+    allowInsecureImages: true
+
+listeners:
+  client:
+    protocol: SASL_PLAINTEXT
+    sasl: true
+  interbroker:
+    protocol: SASL_PLAINTEXT
+    sasl: true
+
+auth:
+  enabled: true
+
+sasl:
+  enabledMechanisms: PLAIN
+  interBrokerMechanism: PLAIN
+  client:
+    users:
+      - admin
+    passwords:
+      - admin-password
+
+controller:
+  replicaCount: 5
