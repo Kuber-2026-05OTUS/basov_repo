@@ -111,6 +111,11 @@ helm upgrade --install homework-release . -n homework --create-namespace
 
 После установки вы увидите сообщение (из `NOTES.txt`), которое подскажет, по какому адресу можно обратиться к сервису (например, с помощью `kubectl port-forward`).
 
+3. Возвращение в корневой каталог:
+```text
+cd ../..
+```
+
 ## 2. Установка Kafka через Helmfile (Задание 2)
 
 В папке `kubernetes-templating/kafka` подготовлен файл `helmfile.yaml` и два файла со значениями (`values-prod.yaml`, `values-dev.yaml`), описывающие установку 2 релизов Kafka из Bitnami чарта:
@@ -136,39 +141,7 @@ global:
 helm plugin install --verify=false https://github.com/databus23/helm-diff
 helm plugin list
 ```
-
-#### Исправление ошибки `executable file not found` на Windows
-
-На Windows установочный hook плагина (bash-скрипт `install-binary.sh`) часто не отрабатывает, поэтому сам бинарник не скачивается. В результате при запуске вы получаете ошибку вида:
-```text
-Error: exec: "C:\\Users\\<user>\\AppData\\Roaming\\helm\\plugins\\helm-diff/bin/diff": executable file not found in %PATH%
-```
-
-Запись о плагине при этом создана, но файла `bin/diff.exe` нет. Бинарник нужно доустановить вручную:
-
-1. Откройте страницу релизов плагина: [github.com/databus23/helm-diff/releases](https://github.com/databus23/helm-diff/releases) и скачайте архив для Windows — `helm-diff-windows-amd64.tgz`.
-2. Распакуйте архив. Внутри будет папка `diff` с файлом `bin/diff.exe`.
-3. Скопируйте `diff.exe` в каталог плагина в подпапку `bin`. Из PowerShell это можно сделать так (укажите путь к скачанному архиву в `$tgz`):
-```powershell
-$plugin = "$env:APPDATA\helm\plugins\helm-diff"
-$tgz = "$env:USERPROFILE\Downloads\helm-diff-windows-amd64.tgz"
-
-# Создаём папку bin внутри каталога плагина (если её нет)
-New-Item -ItemType Directory -Force -Path "$plugin\bin" | Out-Null
-
-# Распаковываем архив во временную папку и копируем бинарник diff.exe
-tar -xzf $tgz -C $env:TEMP
-Copy-Item -Path "$env:TEMP\diff\bin\diff.exe" -Destination "$plugin\bin\diff.exe" -Force
-```
-
-4. Проверьте, что плагин запускается:
-```powershell
-helm diff version
-```
-
-После этого `helmfile apply` будет работать.
-
-### Развертывание с помощью Helmfile
+### Развертывание kafka с помощью Helmfile
 
 Выполните через GitBash команду в папке `kubernetes-templating/kafka`:
 
