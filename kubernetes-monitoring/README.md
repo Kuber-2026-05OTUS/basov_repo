@@ -59,6 +59,8 @@ kubectl apply -f namespace.yaml
 
 В файле `deployment.yaml` описан pod с двумя контейнерами: нашим кастомным `nginx` и `nginx-prometheus-exporter`, который собирает метрики из `nginx` (по адресу `http://localhost:80/stub_status`) и отдает их в формате Prometheus на порту `9113`.
 
+> Внимание: начиная с версии `1.0.0` экспортер `nginx-prometheus-exporter` использует парсер флагов kingpin, поэтому адрес для сбора метрик задается флагом с двойным дефисом: `--nginx.scrape-uri=http://localhost:80/stub_status`. С одиночным дефисом (`-nginx.scrape-uri`) контейнер уйдет в CrashLoopBackOff.
+
 ```powershell
 kubectl apply -f deployment.yaml
 ```
