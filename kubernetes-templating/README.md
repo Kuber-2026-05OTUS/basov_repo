@@ -81,75 +81,10 @@ kubectl config current-context
 kubectl get nodes
 ```
 
-### Запуск k9s
+### Запуск k9s отдельно в PowerShell
 
 ```powershell
 k9s
-```
-
-## Возможные ошибки
-
-### Конфигурация с Docker на WSL 
-
-Переустановите WSL в версию 2 (Rancher Desktop поддерживает только WSL 2):
-
-```powershell
-# Откройте PowerShell и проверьте версии WSL
-wsl --list --verbose
-
-# Если версия WSL = 1, переключите на WSL 2
-wsl --set-version rancher-desktop 2
-wsl --set-version rancher-desktop-data 2
-
-# Установите WSL 2 как версию по умолчанию для новых дистрибутивов
-wsl --set-default-version 2
-```
-
-Обновите WSL:
-
-```powershell
-wsl --update
-```
-
-Перезапустите WSL и Rancher Desktop:
-
-```powershell
-# Полная остановка WSL
-wsl --shutdown
-```
-Затем перезапустите Rancher Desktop через File -> Exit
-
-
-Проверьте, что заглушка создана:
-
-```text
-mkdir -p ~/.kube
-cat > ~/.kube/config <<EOF
-apiVersion: v1
-clusters: []
-contexts: []
-current-context: ""
-kind: Config
-preferences: {}
-users: []
-EOF
-rm -rf ~/.kube/
-```
-
-Если ошибка сохраняется — зарегистрируйте дистрибутивы вручную:
-
-```powershell
-# Удалите старые записи
-wsl --unregister rancher-desktop
-wsl --unregister rancher-desktop-data
-
-# Перезапустите Rancher Desktop — он создаст дистрибутивы заново
-```
-
-Дополнительно: сбросьте Winsock (если есть проблемы с сетью):
-
-```powershell
-netsh winsock reset
 ```
 
 ## 1. Развертывание приложения (Задание 1)
@@ -187,12 +122,7 @@ helm upgrade --install homework-release . -n homework --create-namespace
 
 Bitnami закрыл бесплатный доступ к своим образам, поэтому в `values-*.yaml` используется совместимый community-образ `soldevelo/kafka`. В их реестре нет версии `3.5.2`, поэтому взята ближайшая доступная — `3.7.1`. Так как Kafka к этому моменту уже перешла с ZooKeeper на KRaft, нужно зафиксировать версию чарта, совместимую с образом: для Kafka `3.7.1` это чарт `29.3.14` (поэтому он запинен в `helmfile.yaml` через `version: 29.3.14`).
 
-Подобрать версию чарта под образ можно так:
-```powershell
-helm search repo bitnami/kafka --versions
-```
-
-Поскольку чарт от Bitnami, а образ сторонний, в `values-*.yaml` добавлен флаг, разрешающий несовместимые образы:
+Поскольку чарт от Bitnami, а образ сторонний, в yaml файл values добавлен флаг, разрешающий несовместимые образы:
 ```yaml
 global:
   security:
@@ -201,17 +131,17 @@ global:
 
 ### Плагин helm-diff
 
-`helmfile apply` использует под капотом `helm diff`. Если плагин не установлен, команда упадёт с ошибкой `unknown command "diff" for "helm"`. Установите плагин один раз:
-```powershell
-helm plugin install https://github.com/databus23/helm-diff
+`helmfile apply` использует под капотом `helm diff`. Если плагин не установлен, команда упадёт с ошибкой `unknown command "diff" for "helm"`. Установите плагин один раз через GitBash:
+```text
+helm plugin install --verify=false https://github.com/databus23/helm-diff
 helm plugin list
 ```
 
 ### Развертывание с помощью Helmfile
 
-Выполните команду в папке `kubernetes-templating/kafka`:
+Выполните через GitBash команду в папке `kubernetes-templating/kafka`:
 
-```powershell
+```text
 cd kubernetes-templating/kafka
 
 # (опционально) посмотреть итоговые манифесты с подстановками
@@ -225,13 +155,13 @@ helmfile apply
 
 ## 3. Проверка работоспособности
 
-- Проверка статуса релизов Helm:
-```powershell
+- Проверка статуса релизов Helm через Git Bash:
+```text
 helm list -A
 ```
 
-- Проверка подов Kafka:
-```powershell
+- Проверка подов Kafka через GitBash:
+```text
 kubectl get pods -n prod
 kubectl get pods -n dev
 ```
