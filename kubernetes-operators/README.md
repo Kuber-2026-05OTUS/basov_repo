@@ -33,7 +33,7 @@ winget install -e --id Kubernetes.kubectl
 winget install -e --id Derailed.k9s
 ```
 
-Проверка, что утилиты доступны:
+Проверка из PowerShell, что утилиты доступны:
 
 ```powershell
 kubectl version --client
