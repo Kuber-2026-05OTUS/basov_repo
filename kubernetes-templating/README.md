@@ -47,6 +47,111 @@ scoop install helmfile
 helmfile version
 ```
 
+### Установка RancherDesktop через winget (PowerShell от администратора)
+
+```powershell
+winget install Microsoft.WSL
+winget install SUSE.RancherDesktop
+winget install Kubernetes.kubectl
+winget install Helm.Helm
+winget install derailed.k9s
+```
+
+Полезные ссылки:
+
+- Rancher Desktop: https://rancherdesktop.io/
+- k3s: https://docs.k3s.io/
+- k9s: https://k9scli.io/topics/install/
+- kubectl: https://kubernetes.io/docs/tasks/tools/
+- Helm: https://helm.sh/docs/intro/install/
+- Gateway API: https://gateway-api.sigs.k8s.io/
+
+### Настройка Rancher Desktop
+
+1. Открыть Rancher Desktop.
+2. В разделе Kubernetes включить `Enable Kubernetes`.
+3. Container Engine выбрать `containerd`.
+4. В Kubernetes version выбрать релиз с k3s (из стабильных выбрать latest).
+5. Нажать `Apply` и дождаться статуса `Kubernetes is running`.
+
+Проверка:
+
+```powershell
+kubectl config current-context
+kubectl get nodes
+```
+
+### Запуск k9s
+
+```powershell
+k9s
+```
+
+## Возможные ошибки
+
+### Конфигурация с Docker на WSL 
+
+Переустановите WSL в версию 2 (Rancher Desktop поддерживает только WSL 2):
+
+```powershell
+# Откройте PowerShell и проверьте версии WSL
+wsl --list --verbose
+
+# Если версия WSL = 1, переключите на WSL 2
+wsl --set-version rancher-desktop 2
+wsl --set-version rancher-desktop-data 2
+
+# Установите WSL 2 как версию по умолчанию для новых дистрибутивов
+wsl --set-default-version 2
+```
+
+Обновите WSL:
+
+```powershell
+wsl --update
+```
+
+Перезапустите WSL и Rancher Desktop:
+
+```powershell
+# Полная остановка WSL
+wsl --shutdown
+```
+Затем перезапустите Rancher Desktop через File -> Exit
+
+
+Проверьте, что заглушка создана:
+
+```text
+mkdir -p ~/.kube
+cat > ~/.kube/config <<EOF
+apiVersion: v1
+clusters: []
+contexts: []
+current-context: ""
+kind: Config
+preferences: {}
+users: []
+EOF
+rm -rf ~/.kube/
+```
+
+Если ошибка сохраняется — зарегистрируйте дистрибутивы вручную:
+
+```powershell
+# Удалите старые записи
+wsl --unregister rancher-desktop
+wsl --unregister rancher-desktop-data
+
+# Перезапустите Rancher Desktop — он создаст дистрибутивы заново
+```
+
+Дополнительно: сбросьте Winsock (если есть проблемы с сетью):
+
+```powershell
+netsh winsock reset
+```
+
 ## 1. Развертывание приложения (Задание 1)
 
 В директории `kubernetes-templating/homework-chart` подготовлен Helm-чарт для развертывания приложения из предыдущих заданий (nginx с initContainer).
@@ -58,14 +163,14 @@ helmfile version
 
 ### Установка релиза
 
-1. Обновите зависимости (Redis):
-```powershell
+1. Обновите зависимости (Redis) из Gib Bash:
+```text
 cd kubernetes-templating/homework-chart
 helm dependency update
 ```
 
-2. Установите чарт в namespace `homework`:
-```powershell
+2. Установите чарт в namespace `homework`  из Gib Bash:
+```text
 helm upgrade --install homework-release . -n homework --create-namespace
 ```
 
