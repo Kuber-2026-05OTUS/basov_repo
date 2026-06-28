@@ -6,13 +6,13 @@
 
 Helm используется для управления пакетами Kubernetes.
 
-Установка с помощью `winget`:
+Установка с помощью `winget` из PowerShell:
 ```powershell
 winget install -e --id Helm.Helm
 ```
 
-Проверка установки:
-```powershell
+Проверка установки из GitBash:
+```text
 helm version
 ```
 
