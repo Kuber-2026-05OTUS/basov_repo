@@ -29,6 +29,17 @@ helm repo update
 helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace
 ```
 
+> **Если установка падает с ошибкой `cluster reachability check failed: kubernetes cluster unreachable: ... connectex: No connection could be made because the target machine actively refused it`** — это значит, что кластер Kubernetes не запущен (или kubeconfig указывает на несуществующий/остановленный кластер), поэтому helm и kubectl не могут до него достучаться. Проверьте и запустите кластер перед установкой:
+>
+> ```powershell
+> minikube status          # проверить состояние кластера
+> minikube start           # запустить кластер, если он остановлен
+> kubectl config current-context   # должен быть контекст minikube
+> kubectl cluster-info     # проверить, что API-сервер отвечает
+> ```
+>
+> Адрес и порт API-сервера в ошибке (например, `https://localhost:55370`) у Minikube назначаются динамически и меняются после каждого `minikube start`. Команда `minikube start` сама обновит kubeconfig на актуальный адрес. После того как `kubectl cluster-info` показывает работающий API-сервер, повторите `helm install`.
+
 Убедитесь, что все pod'ы успешно запустились (это может занять несколько минут):
 
 ```powershell
