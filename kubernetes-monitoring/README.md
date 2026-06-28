@@ -4,7 +4,7 @@
 
 ### Предварительные требования
 
-У вас должен быть запущен кластер (например, Minikube) и установлен пакетный менеджер Helm. Если Helm не установлен, его можно установить через winget:
+У вас должен быть запущен кластер Minikube и установлен пакетный менеджер Helm. Если Helm не установлен, его можно установить через winget из PowerShell:
 
 ```powershell
 winget install Helm.Helm
@@ -14,9 +14,9 @@ winget install Helm.Helm
 
 ### Добавление Helm репозитория Prometheus
 
-Выполните следующие команды в PowerShell (или Git Bash):
+Выполните следующие команды в Git Bash:
 
-```powershell
+```text
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 ```
