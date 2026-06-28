@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mysql-operator
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mysql-operator
+rules:
+  # Полный контроль над кастомным ресурсом MySQL (включая удаление)
+  - apiGroups: ["otus.homework"]
+    resources: ["mysqls"]
+    verbs: ["get", "list", "watch", "update", "patch", "delete"]
+
+  # Создание/обновление/удаление Deployment и ReplicaSet
+  - apiGroups: ["apps"]
+    resources: ["deployments", "deployments/status", "replicasets"]
+    verbs: ["create", "update", "patch", "delete"]
+
+  # Создание/удаление Service
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["create", "delete"]
+
+  # Создание/удаление PersistentVolume
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["create", "delete"]
+
+  # Создание/удаление PersistentVolumeClaim
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["create", "delete"]
+
+  # Создание событий (для логирования)
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch", "update"]
+
+  # после этого ворнинг пропал в логах
+  # WARNING Not enough permissions to watch for resources: changes (creation/deletion/updates) will not be noticed; the resources are ...
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: mysql-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: mysql-operator
+subjects:
+  - kind: ServiceAccount
+    name: mysql-operator
+    namespace: default

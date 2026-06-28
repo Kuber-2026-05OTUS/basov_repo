@@ -175,11 +175,16 @@ kubectl apply -f crd.yaml
 kubectl get crd
 ```
 
-## 2. Создание ServiceAccount, ClusterRole и ClusterRoleBinding (rbac.yaml)
+## 2. Создание ServiceAccount, ClusterRole и ClusterRoleBinding
 
-В этом файле сразу реализовано **Задание со ***: описан минимальный набор прав доступа для оператора, вместо полных прав.
+Права для оператора подготовлены в двух вариантах:
 
-Подготовка `rbac.yaml`:
+- `security.yaml` — **основное задание**: сервис-аккаунт с полными правами на доступ к API-серверу.
+- `security-minimal.yaml` — **задание со ***: минимальный набор прав, необходимых оператору (управление ресурсом CRD, создание и удаление Service, PV, PVC, Deployment).
+
+Применяется только один из этих файлов (см. раздел «Запуск всего решения»).
+
+Подготовка `security.yaml` (полные права — основное задание):
 
 ```yaml
 apiVersion: v1
@@ -193,29 +198,12 @@ kind: ClusterRole
 metadata:
   name: mysql-operator
 rules:
-  # Права для работы с CRD и кастомными ресурсами MySQL
-  - apiGroups: ["apiextensions.k8s.io"]
-    resources: ["customresourcedefinitions"]
-    verbs: ["get", "list", "watch", "patch", "update"]
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
   - apiGroups: ["otus.homework"]
-    resources: ["mysqls", "mysqls/status", "mysqls/finalizers"]
-    verbs: ["get", "list", "watch", "patch", "update"]
-  
-  # Права для создания ресурсов (Service, PV, PVC, Deployment)
-  - apiGroups: [""]
-    resources: ["services", "persistentvolumes", "persistentvolumeclaims", "pods"]
-    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
-  
-  # Права для работы Kopf (фреймворка оператора)
-  - apiGroups: ["kopf.dev"]
-    resources: ["clusterkopfpeerings", "kopfpeerings"]
-    verbs: ["get", "list", "watch", "patch", "update"]
-  - apiGroups: [""]
-    resources: ["events"]
-    verbs: ["create", "patch", "update"]
+    resources: ["mysqls"]
+    verbs: ["*"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -231,15 +219,83 @@ subjects:
     namespace: default
 ```
 
-Применение:
+Подготовка `security-minimal.yaml` (минимальные права — задание со *):
 
-```powershell
-kubectl apply -f rbac.yaml
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mysql-operator
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mysql-operator
+rules:
+  # Полный контроль над кастомным ресурсом MySQL (включая удаление)
+  - apiGroups: ["otus.homework"]
+    resources: ["mysqls"]
+    verbs: ["get", "list", "watch", "update", "patch", "delete"]
+
+  # Создание/обновление/удаление Deployment и ReplicaSet
+  - apiGroups: ["apps"]
+    resources: ["deployments", "deployments/status", "replicasets"]
+    verbs: ["create", "update", "patch", "delete"]
+
+  # Создание/удаление Service
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["create", "delete"]
+
+  # Создание/удаление PersistentVolume
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["create", "delete"]
+
+  # Создание/удаление PersistentVolumeClaim
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["create", "delete"]
+
+  # Создание событий (для логирования)
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch", "update"]
+
+  # минимально необходимые права на чтение/наблюдение,
+  # чтобы Kopf не писал WARNING про нехватку прав на watch
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: mysql-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: mysql-operator
+subjects:
+  - kind: ServiceAccount
+    name: mysql-operator
+    namespace: default
 ```
 
-## 3. Создание Deployment для оператора (deploy.yaml)
+Применение (один из вариантов):
 
-Подготовка `deploy.yaml`:
+```powershell
+# основное задание (полные права)
+kubectl apply -f security.yaml
+
+# либо задание со * (минимальные права)
+kubectl apply -f security-minimal.yaml
+```
+
+## 3. Создание Deployment для оператора (deployment.yaml)
+
+Подготовка `deployment.yaml`:
 
 ```yaml
 apiVersion: apps/v1
@@ -261,59 +317,64 @@ spec:
       containers:
         - name: operator
           image: roflmaoinmysoul/mysql-operator:1.0.0
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
 ```
 
 Применение:
 
 ```powershell
-kubectl apply -f deploy.yaml
+kubectl apply -f deployment.yaml
 kubectl get pods -l app=mysql-operator
 ```
 
-## 4. Создание кастомного ресурса MySQL (cr.yaml)
+## 4. Создание кастомного ресурса MySQL (object-crd.yaml)
 
-Подготовка `cr.yaml`:
+Подготовка `object-crd.yaml`:
 
 ```yaml
 apiVersion: otus.homework/v1
 kind: MySQL
 metadata:
-  name: mysql-instance
-  namespace: default
+  name: mysql-demo
 spec:
-  image: mysql:5.7
-  database: otus-database
-  password: otus-password
+  image: mysql:8.0
+  database: otusdb
+  password: gta6_is_comming_soon
   storage_size: 1Gi
 ```
 
 Применение:
 
 ```powershell
-kubectl apply -f cr.yaml
+kubectl apply -f object-crd.yaml
 ```
 
 ## 5. Запуск всего решения
 
-Из каталога `kubernetes-operators`:
+Из каталога `kubernetes-operators`.
+
+**Основное задание** (оператор с полными правами):
 
 ```powershell
 kubectl apply -f crd.yaml
-kubectl apply -f rbac.yaml
-kubectl apply -f deploy.yaml
+kubectl apply -f security.yaml
+kubectl apply -f object-crd.yaml
+kubectl apply -f deployment.yaml
+```
+
+**Задание со *** (тот же оператор, но с минимальными правами):
+
+```powershell
+kubectl apply -f crd.yaml
+kubectl apply -f security-minimal.yaml
+kubectl apply -f object-crd.yaml
+kubectl apply -f deployment.yaml
 ```
 
 Дождитесь, пока под оператора перейдет в статус Running:
 
 ```powershell
 kubectl get pods -l app=mysql-operator -w
-```
-
-Затем создайте кастомный ресурс:
-
-```powershell
-kubectl apply -f cr.yaml
 ```
 
 ## 6. Проверка работы оператора
@@ -325,16 +386,16 @@ kubectl get mysqls
 kubectl get pv,pvc,svc,deployments,pods
 ```
 
-Вы должны увидеть, что оператор автоматически создал:
-- PersistentVolume (`mysql-instance-pv`)
-- PersistentVolumeClaim (`mysql-instance-pvc`)
-- Service (`mysql-instance-svc`)
-- Deployment (`mysql-instance-deployment`)
+Вы должны увидеть, что оператор автоматически создал для ресурса `mysql-demo`:
+- PersistentVolume (`mysql-demo-pv`)
+- PersistentVolumeClaim (`mysql-demo-pvc`)
+- Service (`mysql-demo`)
+- Deployment (`mysql-demo`)
 
 Проверка удаления ресурсов:
 
 ```powershell
-kubectl delete mysql mysql-instance
+kubectl delete mysql mysql-demo
 kubectl get pv,pvc,svc,deployments,pods
 ```
 
@@ -357,16 +418,16 @@ docker build -t my-mysql-operator:1.0.0 .
 nerdctl build -t my-mysql-operator:1.0.0 .
 ```
 
-Затем в файле `deploy.yaml` замените образ `roflmaoinmysoul/mysql-operator:1.0.0` на `my-mysql-operator:1.0.0` и примените изменения.
+Затем в файле `deployment.yaml` замените образ `roflmaoinmysoul/mysql-operator:1.0.0` на `my-mysql-operator:1.0.0` и примените изменения.
 
 ## 8. Полезные команды администратора
 
 ```powershell
 kubectl describe crd mysqls.otus.homework
-kubectl describe mysql mysql-instance
+kubectl describe mysql mysql-demo
 kubectl logs -l app=mysql-operator
-kubectl delete -f cr.yaml
-kubectl delete -f deploy.yaml
-kubectl delete -f rbac.yaml
+kubectl delete -f object-crd.yaml
+kubectl delete -f deployment.yaml
+kubectl delete -f security.yaml          # либо security-minimal.yaml
 kubectl delete -f crd.yaml
 ```

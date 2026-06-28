@@ -1,0 +1,10 @@
+---
+apiVersion: otus.homework/v1
+kind: MySQL
+metadata:
+  name: mysql-demo
+spec:
+  image: mysql:8.0
+  database: otusdb
+  password: gta6_is_comming_soon
+  storage_size: 1Gi
