@@ -58,13 +58,13 @@
 
 ## Рекомендуемые источники
 
-- Документация YC по установке и настройке Managed Kubernetes.
+- Документация YC по установке и настройке Managed Kubernetes.  https://yandex.cloud/ru/docs/managed-kubernetes/
 - Установка Loki.
-- Официальная документация.
-- Версия от YC.
-- Документация по YC S3 Object Storage.
-- Документация по установке и использованию Grafana.
-- Установка Promtail.
+- Официальная документация.  https://grafana.com/docs/loki/latest/setup/install/
+- Версия от YC.  https://yandex.cloud/ru/docs/managed-kubernetes/operations/applications/loki
+- Документация по YC S3 Object Storage.  https://yandex.cloud/ru/docs/storage/
+- Документация по установке и использованию Grafana.  https://grafana.com/docs/grafana/latest/setup-grafana/installation/kubernetes/
+- Установка Promtail.  https://grafana.com/docs/loki/latest/send-data/promtail/installation/
 
 ---
 
@@ -131,10 +131,10 @@
 
 ## 7. Рекомендуемые источники
 
-- Документация YC по установке и настройке Managed Kubernetes.
+- Документация YC по установке и настройке Managed Kubernetes.  https://yandex.cloud/ru/docs/managed-kubernetes/
 - Установка Loki.
-- Официальная документация.
-- Версия от YC.
-- Документация по YC S3 Object Storage.
-- Документация по установке и использованию Grafana.
-- Установка Promtail.
+- Официальная документация.  https://grafana.com/docs/loki/latest/setup/install/
+- Версия от YC.  https://yandex.cloud/ru/docs/managed-kubernetes/operations/applications/loki
+- Документация по YC S3 Object Storage.  https://yandex.cloud/ru/docs/storage/
+- Документация по установке и использованию Grafana.  https://grafana.com/docs/grafana/latest/setup-grafana/installation/kubernetes/
+- Установка Promtail.  https://grafana.com/docs/loki/latest/send-data/promtail/installation/
