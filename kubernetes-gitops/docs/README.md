@@ -56,12 +56,12 @@ ArgoCD
 Создайте папку kubernetes-gitops - все файлы, которые у вас получается во время выполнения данного ДЗ необходимо поместить в эту папку.
 
 ### Рекомендуемые источники
-Документация YC по установке и настройке Managed Kubernetes  
+Документация YC по установке и настройке Managed Kubernetes  https://yandex.cloud/ru/docs/managed-kubernetes/
 Установка ArgoCD  
-Официальная документация  
-Версия от YC  
-Документация по объекту Project ArgoCD  
-Документация по объекту Application ArgoCD
+Официальная документация  https://argo-cd.readthedocs.io/en/stable/getting_started/
+Версия от YC  https://yandex.cloud/ru/docs/managed-kubernetes/operations/applications/argo-cd
+Документация по объекту Project ArgoCD  https://argo-cd.readthedocs.io/en/stable/operator-manual/project-specification/
+Документация по объекту Application ArgoCD  https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/
 
 ## 4. Пошаговая инструкция выполнения домашнего задания
 Данное задание будет выполняться в managed k8s в Yandex Cloud.  
@@ -111,9 +111,9 @@ Namespace – HomeworkHelm. Убедитесь, что установка чар
 1 балл – все задания выполнены полностью.
 
 ## 7. Рекомендуемые источники
-Документация YC по установке и настройке Managed Kubernetes  
+Документация YC по установке и настройке Managed Kubernetes  https://yandex.cloud/ru/docs/managed-kubernetes/
 Установка ArgoCD  
-Официальная документация  
-Версия от YC  
-Документация по объекту Project ArgoCD  
-Документация по объекту Application ArgoCD
+Официальная документация  https://argo-cd.readthedocs.io/en/stable/getting_started/
+Версия от YC  https://yandex.cloud/ru/docs/managed-kubernetes/operations/applications/argo-cd
+Документация по объекту Project ArgoCD  https://argo-cd.readthedocs.io/en/stable/operator-manual/project-specification/
+Документация по объекту Application ArgoCD  https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/
