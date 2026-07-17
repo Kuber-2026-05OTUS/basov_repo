@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubernetes-networks
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: Otus
+  source:
+    repoURL: <REPO_URL>
+    targetRevision: HEAD
+    path: kubernetes-networks
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: homework
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
