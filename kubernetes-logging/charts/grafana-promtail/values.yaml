@@ -1,0 +1,23 @@
+daemonset:
+  enabled: true
+
+deployment:
+  enabled: false
+
+# любой тейнт
+tolerations:
+  - operator: Exists
+
+config:
+  enabled: true
+  logLevel: info
+  serverPort: 3101
+
+  clients:
+    - url: http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push
+
+  snippets:
+    pipelineStages:
+      - cri: {}
+
+    extraScrapeConfigs: ""

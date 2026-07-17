@@ -1,0 +1,28 @@
+replicas: 1
+
+nodeSelector:
+  node-role: infra
+
+tolerations:
+  - key: node-role
+    operator: Equal
+    value: infra
+    effect: NoSchedule
+
+# если закоментить нужно потом брать после установке с логов
+adminUser: admin
+adminPassword: admin123
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki-gateway.loki.svc.cluster.local
+        isDefault: true
+
+persistence:
+  enabled: true
+  existingClaim: grafana-data
