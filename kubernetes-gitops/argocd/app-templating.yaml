@@ -3,22 +3,18 @@ kind: Application
 metadata:
   name: kubernetes-templating
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
-  project: Otus
+  project: otus
   source:
-    repoURL: <REPO_URL>
-    targetRevision: HEAD
+    repoURL: "https://github.com/Kuber-2026-05OTUS/basov_repo.git"
     path: kubernetes-templating/homework-chart
+    targetRevision: HEAD
     helm:
-      valueFiles:
-        - values.yaml
       parameters:
         - name: replicaCount
-          value: "1"
+          value: "3"
   destination:
-    server: https://kubernetes.default.svc
+    server: "https://kubernetes.default.svc"
     namespace: HomeworkHelm
   syncPolicy:
     automated:
