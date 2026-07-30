@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubernetes-templating
+  namespace: argocd
+spec:
+  project: otus
+  source:
+    repoURL: "https://github.com/Kuber-2026-05OTUS/basov_repo.git"
+    path: kubernetes-templating/homework-chart
+    targetRevision: HEAD
+    helm:
+      parameters:
+        - name: replicaCount
+          value: "3"
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: HomeworkHelm
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

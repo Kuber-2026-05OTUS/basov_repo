@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: otus
+  namespace: argocd
+spec:
+  description: Otus Homework Project
+  sourceRepos:
+    - "https://github.com/Kuber-2026-05OTUS/basov_repo.git"
+  destinations:
+    - namespace: "*"
+      server: "https://kubernetes.default.svc"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
