@@ -1,0 +1,9 @@
+tolerations:
+  - key: "node-role"
+    operator: "Equal"
+    value: "infra"
+    effect: "NoSchedule"
+
+config:
+  clients:
+    - url: http://loki:3100/loki/api/v1/push
