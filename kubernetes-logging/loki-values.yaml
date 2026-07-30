@@ -1,0 +1,36 @@
+loki:
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 1
+  storage:
+    type: s3
+    bucketNames:
+      chunks: my-loki-bucket
+      ruler: my-loki-bucket
+      admin: my-loki-bucket
+    s3:
+      endpoint: storage.yandexcloud.net
+      region: ru-central1
+      secretAccessKey: "YOUR_SECRET_ACCESS_KEY"
+      accessKeyId: "YOUR_ACCESS_KEY_ID"
+      s3ForcePathStyle: true
+      insecure: false
+
+deploymentMode: SingleBinary
+
+singleBinary:
+  replicas: 1
+  tolerations:
+    - key: "node-role"
+      operator: "Equal"
+      value: "infra"
+      effect: "NoSchedule"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: "node-role"
+                operator: "In"
+                values:
+                  - "infra"
