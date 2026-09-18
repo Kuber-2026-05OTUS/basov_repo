@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: debug-demo
+  labels:
+    app.kubernetes.io/part-of: kubernetes-debug-demo
