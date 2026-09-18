@@ -1,30 +1,33 @@
-# Checklist
+# Основное ДЗ
 
-Self-assessment against `docs/README.md`'s requirements. `Verified` means
-proven in this sandbox (structural/static tests, files exist). `Not
-verified` means it needs a real Yandex Cloud account and a live Managed
-Kubernetes cluster -- see `../IMPLEMENTATION_REPORT.md`.
+## В процессе сделано:
+### Подготовлены манифесты для Managed Kubernetes в Yandex Cloud (конфигурация нод не имеет значения по условию задания)
+### Задокументировано создание бакета Yandex Object Storage (autoProvisioning — бакет создается CSI-драйвером на каждый том)
+### Задокументировано создание IAM сервисного аккаунта с ролью `storage.editor` и генерация статического ключа доступа
+### Создан манифест Secret с ключами доступа к Object Storage (`k8s/secret.example.yaml`)
+### Создан манифест StorageClass с провижининг-драйвером `ru.yandex.s3.csi` (`k8s/storageclass.yaml`)
+### Задокументирована установка CSI-драйвера `yandex-cloud/k8s-csi-s3` из репозитория (Helm-чарт и manual-манифесты)
+### Создан манифест PVC с автоматическим провижинингом на основе StorageClass (`k8s/pvc.yaml`)
+### Создан манифест Deployment, монтирующий PVC в `/data/s3` и записывающий в него данные каждые 5 секунд (`k8s/deployment.yaml`)
 
-| # | Requirement | Status | Evidence |
-| --- | --- | --- | --- |
-| 1 | Managed Kubernetes cluster in Yandex Cloud (any node config) | Documented, not created | `docs/cloud/README.md` §3 |
-| 2 | Object Storage bucket for mounting into pods | Documented (auto-provisioned per volume by design; a pre-created bucket is also documented as an option) | `docs/cloud/README.md` §3, `k8s/storageclass.yaml` |
-| 3 | IAM service account with bucket access rights + generated static access key | Documented (role `storage.editor`, `yc iam` commands) | `docs/cloud/README.md` §4 |
-| 4 | Secret with the access keys, manifest attached | Verified structurally (required keys present, values are placeholders, not real secrets) | `k8s/secret.example.yaml`, `tests/test_manifests.py::test_secret_example_has_required_keys_and_no_real_secret` |
-| 5 | StorageClass manifest, attached | Verified structurally (provisioner `ru.yandex.s3.csi`, references the secret) | `k8s/storageclass.yaml`, `tests/test_manifests.py::test_storageclass_uses_csi_s3_provisioner_and_references_secret` |
-| 6 | CSI driver installed from the upstream repository | Documented (Helm chart + manual manifest install), not run against a live cluster | `docs/cloud/README.md` §5, `helm/csi-s3-values.yaml` |
-| 7 | PVC manifest using the StorageClass with autoProvisioning, attached | Verified structurally (no fixed `bucket`, no `volumeName`/`selector` -- dynamic provisioning) | `k8s/pvc.yaml`, `tests/test_manifests.py::test_pvc_uses_storageclass_and_dynamic_provisioning` |
-| 8 | Pod/Deployment manifest mounting the PVC at an arbitrary path, attached | Verified structurally (mounts `csi-s3-pvc` at `/data/s3`) | `k8s/deployment.yaml`, `tests/test_manifests.py::test_deployment_mounts_pvc_at_arbitrary_path` |
-| 9 | Pod writes to the mounted directory; files are confirmed to land in Object Storage | Written (heartbeat writer loop), **not verified** -- needs a live cluster + bucket to confirm objects actually appear | `k8s/deployment.yaml`, `README.md` demo script step 4-5 |
-| 10 | No `latest` image tags in manifests authored here | Verified | `tests/test_manifests.py::test_no_latest_image_tags` |
-| 11 | Workload hardening (non-root, dropped capabilities, resource limits) beyond the assignment's letter but consistent with the rest of the project | Verified | `k8s/deployment.yaml`, `tests/test_manifests.py::test_deployment_is_hardened` |
-| 12 | All manifests are syntactically valid Kubernetes YAML | Verified | `tests/test_manifests.py::test_all_manifests_parse_as_valid_yaml` |
+## Как запустить проект:
+### Выполнить команды из `kubernetes-csi/docs/cloud/README.md` (разделы 4-5): создать бакет/сервисный аккаунт, поднять кластер, установить CSI-драйвер, затем:
+```
+kubectl apply -f kubernetes-csi/k8s/namespace.yaml
+kubectl create secret generic csi-s3-secret -n kube-system --from-literal=accessKeyID=<key> --from-literal=secretAccessKey=<secret> --from-literal=endpoint=https://storage.yandexcloud.net --from-literal=region=ru-central1
+kubectl apply -f kubernetes-csi/k8s/storageclass.yaml
+kubectl apply -f kubernetes-csi/k8s/pvc.yaml
+kubectl apply -f kubernetes-csi/k8s/deployment.yaml
+```
 
-## Known limitation: the driver's own node plugin needs `privileged`
+## Как проверить работоспособность:
+### Проверить, что PVC связан: `kubectl get pvc -n csi-s3-demo csi-s3-pvc` (должен быть `Bound`)
+### Проверить запись в примонтированный каталог: `kubectl exec -n csi-s3-demo deploy/csi-s3-writer -- tail -n 5 /data/s3/heartbeat.log`
+### Проверить, что файл реально появился в Object Storage: `yc storage s3api list-objects-v2 --bucket <имя автоматически созданного бакета>` (имя бакета совпадает с `volumeHandle` соответствующего PV)
 
-The upstream `csi-s3` node DaemonSet (not authored in this repo -- it comes
-from the official Helm chart / `deploy/kubernetes/*.yaml`) runs privileged
-in `kube-system` because FUSE mounting requires it. That is an upstream
-constraint of every FUSE-based CSI driver, not something this folder's own
-manifests (`k8s/*.yaml`) do -- those stay non-root, non-privileged, with
-capabilities dropped.
+## PR checklist:
+### Выставлен label с темой домашнего задания
+
+---
+
+Полная таблица соответствия каждому пункту `docs/README.md` (включая, что проверено локальными тестами, а что требует реального облачного аккаунта) — в `../IMPLEMENTATION_REPORT.md`.
