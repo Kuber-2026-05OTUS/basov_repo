@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: airflow
+  labels:
+    app.kubernetes.io/part-of: kubernetes-demo
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: data-platform
+  labels:
+    app.kubernetes.io/part-of: kubernetes-demo
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    app.kubernetes.io/part-of: kubernetes-demo
