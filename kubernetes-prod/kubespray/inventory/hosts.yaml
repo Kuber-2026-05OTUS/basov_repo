@@ -1,0 +1,46 @@
+# kubespray inventory for the bonus (*) HA task: 3 control-plane + 2 worker.
+# IP addresses below are placeholders -- replace with real internal IPs of
+# your 5 Yandex Cloud VMs before running ansible-playbook.
+all:
+  hosts:
+    master-1:
+      ansible_host: 10.0.0.11
+      ip: 10.0.0.11
+      access_ip: 10.0.0.11
+    master-2:
+      ansible_host: 10.0.0.12
+      ip: 10.0.0.12
+      access_ip: 10.0.0.12
+    master-3:
+      ansible_host: 10.0.0.13
+      ip: 10.0.0.13
+      access_ip: 10.0.0.13
+    worker-1:
+      ansible_host: 10.0.0.21
+      ip: 10.0.0.21
+      access_ip: 10.0.0.21
+    worker-2:
+      ansible_host: 10.0.0.22
+      ip: 10.0.0.22
+      access_ip: 10.0.0.22
+  children:
+    kube_control_plane:
+      hosts:
+        master-1:
+        master-2:
+        master-3:
+    kube_node:
+      hosts:
+        worker-1:
+        worker-2:
+    etcd:
+      hosts:
+        master-1:
+        master-2:
+        master-3:
+    k8s_cluster:
+      children:
+        kube_control_plane:
+        kube_node:
+    calico_rr:
+      hosts: {}

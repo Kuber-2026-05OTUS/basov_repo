@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: streamlit
+  namespace: data-platform
+  labels:
+    app.kubernetes.io/name: streamlit
+spec:
+  selector:
+    app.kubernetes.io/name: streamlit
+  ports:
+    - name: http
+      port: 8501
+      targetPort: 8501
+  type: ClusterIP
