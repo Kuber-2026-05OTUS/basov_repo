@@ -1,0 +1,10 @@
+[
+  "tests/test_manifests.py::test_all_manifests_parse_as_valid_yaml",
+  "tests/test_manifests.py::test_deployment_is_hardened",
+  "tests/test_manifests.py::test_deployment_mounts_pvc_at_arbitrary_path",
+  "tests/test_manifests.py::test_namespace_manifest",
+  "tests/test_manifests.py::test_no_latest_image_tags",
+  "tests/test_manifests.py::test_pvc_uses_storageclass_and_dynamic_provisioning",
+  "tests/test_manifests.py::test_secret_example_has_required_keys_and_no_real_secret",
+  "tests/test_manifests.py::test_storageclass_uses_csi_s3_provisioner_and_references_secret"
+]
