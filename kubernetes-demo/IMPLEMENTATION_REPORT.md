@@ -118,6 +118,19 @@ Ran directly, with real output (not asserted from memory):
 - **NetworkPolicy enforcement was not confirmed on Calico** (or any real
   CNI) — the policies are believed correct for Yandex Cloud Managed
   Kubernetes's default Calico CNI, but no live traffic test was performed.
+- **`.github/workflows/kubernetes-demo-ci.yml` could not be pushed via the
+  GitHub API from this environment.** Writing to `.github/workflows/`
+  requires the OAuth `workflow` scope; the connected GitHub authorization
+  only grants `repo` (full repository read/write) plus read-only
+  profile/org scopes, so GitHub's Git Data API rejected the write with a
+  404. Every other file listed above (57 files) was pushed successfully to
+  the `kubernetes-demo` branch. The CI workflow file's exact intended
+  content is committed under
+  `kubernetes-demo/.ci/kubernetes-demo-ci.yml.workflow-source` in this same
+  commit; a maintainer with the `workflow` scope must copy it to
+  `.github/workflows/kubernetes-demo-ci.yml` (e.g.
+  `git mv kubernetes-demo/.ci/kubernetes-demo-ci.yml.workflow-source .github/workflows/kubernetes-demo-ci.yml`)
+  and push, or paste its content into a new file via the GitHub web UI.
 
 ## Known limitations / things a real deployment should reconsider
 
