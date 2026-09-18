@@ -1,0 +1,25 @@
+# StorageClass backed by the yandex-cloud/k8s-csi-s3 driver (provisioner
+# `ru.yandex.s3.csi`). volumeBindingMode Immediate + no `bucket` parameter
+# means autoProvisioning: every PVC gets a freshly created bucket (named
+# after the generated volume ID), deleted automatically when the PV is
+# reclaimed (reclaimPolicy: Delete).
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: csi-s3
+provisioner: ru.yandex.s3.csi
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+parameters:
+  mounter: geesefs
+  # Cap GeeseFS's memory cache and keep the mount world-writable for the demo
+  # workload; tighten dir-mode/file-mode for anything beyond a coursework demo.
+  options: "--memory-limit 1000 --dir-mode 0750 --file-mode 0640"
+  csi.storage.k8s.io/provisioner-secret-name: csi-s3-secret
+  csi.storage.k8s.io/provisioner-secret-namespace: kube-system
+  csi.storage.k8s.io/controller-publish-secret-name: csi-s3-secret
+  csi.storage.k8s.io/controller-publish-secret-namespace: kube-system
+  csi.storage.k8s.io/node-stage-secret-name: csi-s3-secret
+  csi.storage.k8s.io/node-stage-secret-namespace: kube-system
+  csi.storage.k8s.io/node-publish-secret-name: csi-s3-secret
+  csi.storage.k8s.io/node-publish-secret-namespace: kube-system

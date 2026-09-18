@@ -1,0 +1,15 @@
+# Dynamically provisioned PVC (autoProvisioning): csi-s3 creates a new
+# bucket named after the generated volume ID and deletes it when this PVC
+# (and its bound PV) is deleted, per storageclass.yaml's reclaimPolicy.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: csi-s3-pvc
+  namespace: csi-s3-demo
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: csi-s3
