@@ -24,7 +24,7 @@ for details on each.
 | 14 | Structured logging, no secrets logged | Verified (formatter redacts sensitive keys) | `src/logging_config.py` |
 | 15 | Error handling for CBR/Mongo failures | Verified (unit tests raise typed exceptions) | `src/cbr_client.py`, `src/mongo_repository.py` |
 | 16 | Helm values.yaml / values-dev.yaml / values-prod.yaml | Written, `helm lint` not run (helm unavailable in sandbox) | `airflow/values*.yaml` |
-| 17 | CI: ruff, pytest, mypy, yamllint, helm lint, Trivy, pip-audit, Bandit, gitleaks | Workflow written, not executed by GitHub Actions yet | `.github/workflows/kubernetes-demo-ci.yml` |
+| 17 | CI: ruff, pytest, mypy, yamllint, helm lint, Trivy, pip-audit, Bandit, gitleaks | Workflow written, not executed by GitHub Actions yet; pending a manual copy into `.github/workflows/` (see IMPLEMENTATION_REPORT.md) | `.ci/kubernetes-demo-ci.yml.workflow-source` |
 | 18 | Full test suite: unit/integration/security/k8s | Verified (ran locally, see IMPLEMENTATION_REPORT.md) | `tests/` |
 | 19 | README with architecture diagram, demo video script | Verified (file exists) | `README.md` |
 | 20 | docs/cloud/README.md admin guide | Verified (file exists) | `docs/cloud/README.md` |
