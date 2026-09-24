@@ -1,0 +1,27 @@
+# Values for `helm install csi-s3 yandex-s3/csi-s3 -n kube-system -f helm/csi-s3-values.yaml`
+# (chart repo: https://yandex-cloud.github.io/k8s-csi-s3/charts).
+#
+# Do NOT put real keys here. Either:
+#   a) pass them on the CLI: --set secret.accessKey=... --set secret.secretKey=...
+#      (shell history / CI secret masking applies -- prefer (b) for anything
+#      beyond a throwaway coursework cluster), or
+#   b) set secret.create: false and pre-create k8s/secret.example.yaml's
+#      structure yourself (recommended -- keeps the chart from ever seeing
+#      the plaintext key).
+secret:
+  create: false
+  name: csi-s3-secret
+
+storageClass:
+  create: true
+  name: csi-s3
+  mounter: geesefs
+  reclaimPolicy: Delete
+  singleBucket: "" # leave empty: one bucket per PVC (autoProvisioning)
+
+node:
+  # GeeseFS mounts need a privileged node plugin (FUSE) -- this is the
+  # upstream driver's own DaemonSet, not a workload manifest in this repo.
+  # It is scoped to `kube-system` and is out of scope for the RBAC/PSA
+  # hardening applied to `k8s/deployment.yaml` in this folder.
+  tolerateAllTaints: false
