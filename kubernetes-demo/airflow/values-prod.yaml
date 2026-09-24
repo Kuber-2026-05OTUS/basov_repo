@@ -1,0 +1,38 @@
+# Production overlay: external managed Postgres, HA resources, real Secret
+# references only (no literal values -- create Secrets per docs/cloud/README.md).
+postgresql:
+  enabled: false
+
+data:
+  metadataSecretName: "airflow-metadata-secret"     # kubectl create secret ... (see docs/cloud/README.md)
+  brokerUrlSecretName: ~
+
+webserver:
+  replicas: 3
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2
+      memory: 2Gi
+
+scheduler:
+  replicas: 2
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2
+      memory: 2Gi
+
+extraEnvFrom: |
+  - secretRef:
+      name: airflow-fernet-secret   # AIRFLOW_FERNET_KEY, AIRFLOW_SECRET_KEY -- see secret.example.yaml
+
+config:
+  logging:
+    logging_level: "INFO"
+  webserver:
+    base_url: "https://airflow.PLACEHOLDER-DOMAIN.example"
